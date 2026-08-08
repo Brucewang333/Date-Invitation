@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#FFF0F3">
   <meta property="og:title" content="约会邀请 💌">
-  <meta property="og:description" content="想和你共度美好的一天～">
+  <meta property="og:description" content="想约你吃顿好吃的，准备了一个小Moment～">
   <title>Date Invitation</title>
 
   <style>
@@ -19,6 +19,7 @@
       --pink-mid: #FFC0CB;
       --pink-deep: #FF91A4;
       --pink-dark: #E8788A;
+      --pink-hot: #FF6B8A;
       --cocoa: #4A3040;
       --taupe: #8B7B83;
       --cream: #FFFBF7;
@@ -29,9 +30,11 @@
       --shadow-lg: 0 8px 32px rgba(255, 182, 193, 0.30);
       --shadow-button: 0 4px 14px rgba(255, 145, 164, 0.35);
       --shadow-card: 0 6px 24px rgba(255, 182, 193, 0.30);
+      --shadow-envelope: 0 12px 40px rgba(255, 145, 164, 0.25);
 
       --font-display: "Georgia", "STSong", "Songti SC", "Noto Serif SC", serif;
       --font-body: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      --font-pixel: "Courier New", "SimSun", monospace;
 
       --text-xs: 0.75rem;
       --text-sm: 0.875rem;
@@ -58,18 +61,13 @@
       --max-width: 420px;
       --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
       --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+      --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
       --duration-normal: 300ms;
       --duration-slow: 500ms;
+      --duration-very-slow: 800ms;
     }
 
-    /* ===================================
-       RESET & BASE
-    =================================== */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html {
       font-size: 16px;
@@ -100,48 +98,28 @@
       flex-direction: column;
     }
 
-    /* ===================================
-       SCREEN MANAGEMENT
-    =================================== */
     .screen {
       flex: 1;
       display: flex;
       flex-direction: column;
       padding: var(--space-xl);
       padding-bottom: calc(var(--space-3xl) + env(safe-area-inset-bottom, 0px));
-      transition: opacity var(--duration-normal) var(--ease-in-out),
-                  transform var(--duration-normal) var(--ease-out-expo);
     }
 
-    .screen--hidden {
-      display: none !important;
-    }
+    .screen--hidden { display: none !important; }
 
-    /* Transition classes */
-    .slide-in-right {
-      animation: slideInRight var(--duration-normal) var(--ease-out-expo);
-    }
-
-    .slide-in-left {
-      animation: slideInLeft var(--duration-normal) var(--ease-out-expo);
+    /* Transition animations */
+    .fade-in-up {
+      animation: fadeInUp 0.6s var(--ease-out-expo) both;
     }
 
     .fade-in {
-      animation: fadeIn var(--duration-slow) var(--ease-in-out);
+      animation: fadeIn 0.5s var(--ease-in-out) both;
     }
 
-    .fade-in-up {
-      animation: fadeInUp var(--duration-slow) var(--ease-in-out);
-    }
-
-    @keyframes slideInRight {
-      from { opacity: 0; transform: translateX(30px); }
-      to   { opacity: 1; transform: translateX(0); }
-    }
-
-    @keyframes slideInLeft {
-      from { opacity: 0; transform: translateX(-30px); }
-      to   { opacity: 1; transform: translateX(0); }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes fadeIn {
@@ -149,98 +127,693 @@
       to   { opacity: 1; }
     }
 
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.06); }
     }
 
-    @keyframes floatHeart {
-      0%   { transform: translateY(100vh) scale(0.5) rotate(0deg); opacity: 0; }
-      10%  { opacity: 0.08; }
-      90%  { opacity: 0.06; }
-      100% { transform: translateY(-10vh) scale(1.2) rotate(20deg); opacity: 0; }
+    @keyframes floatUpDown {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+
+    @keyframes heartBeat {
+      0%   { transform: scale(1); }
+      14%  { transform: scale(1.3); }
+      28%  { transform: scale(1); }
+      42%  { transform: scale(1.3); }
+      70%  { transform: scale(1); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes gentleShake {
+      0%, 100% { transform: translateX(0); }
+      25%      { transform: translateX(-2px); }
+      75%      { transform: translateX(2px); }
+    }
+
+    @keyframes pixelGlow {
+      0%, 100% { text-shadow: 0 0 4px rgba(255, 145, 164, 0.4); }
+      50%      { text-shadow: 0 0 12px rgba(255, 145, 164, 0.8), 0 0 20px rgba(255, 145, 164, 0.4); }
     }
 
     /* ===================================
-       LANDING SCREEN
+       PAGE 1: ENVELOPE
     =================================== */
-    #screen-landing {
+    #screen-envelope {
       justify-content: center;
       align-items: center;
       text-align: center;
-      position: relative;
     }
 
-    /* Floating hearts background */
-    .bg-hearts {
-      position: fixed;
+    .page1-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2xl);
+      animation: fadeInUp 0.8s var(--ease-out-expo) both;
+    }
+
+    /* Envelope */
+    .envelope-wrapper {
+      position: relative;
+      width: 200px;
+      height: 140px;
+      cursor: pointer;
+      animation: floatUpDown 3s var(--ease-in-out) infinite;
+    }
+
+    .envelope {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Envelope body */
+    .envelope-body {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 200px;
+      height: 130px;
+      background: linear-gradient(145deg, #FFD1D9, #FFB6C1);
+      border-radius: 12px;
+      box-shadow: var(--shadow-envelope);
+      overflow: hidden;
+    }
+
+    /* Envelope frill (V-shape at the bottom) */
+    .envelope-body::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        linear-gradient(to bottom right, transparent 49%, #FFA5B5 49%, #FFA5B5 51%, transparent 51%) no-repeat bottom left / 50% 50%,
+        linear-gradient(to bottom left, transparent 49%, #FFA5B5 49%, #FFA5B5 51%, transparent 51%) no-repeat bottom right / 50% 50%;
+    }
+
+    /* Envelope flap */
+    .envelope-flap {
+      position: absolute;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: 0;
-      max-width: 100vw;
+      width: 0;
+      height: 0;
+      border-left: 100px solid transparent;
+      border-right: 100px solid transparent;
+      border-top: 75px solid #FFC0CB;
+      filter: drop-shadow(0 2px 4px rgba(255, 145, 164, 0.3));
+      transition: transform 0.5s var(--ease-out-expo);
+      transform-origin: top center;
+      z-index: 2;
     }
 
-    .bg-hearts .heart {
+    .envelope-flap.opened {
+      transform: rotateX(180deg);
+    }
+
+    /* Heart seal on flap */
+    .envelope-seal {
       position: absolute;
-      font-size: 2rem;
-      bottom: -5vh;
-      animation: floatHeart 16s linear infinite;
+      top: -55px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 36px;
+      background: var(--pink-deep);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      z-index: 3;
+      box-shadow: 0 2px 8px rgba(255, 145, 164, 0.4);
+      transition: opacity 0.3s;
+    }
+
+    .envelope-seal.hidden {
       opacity: 0;
     }
 
-    .bg-hearts .heart:nth-child(1)  { left: 5%;  animation-duration: 14s; animation-delay: 0s;    font-size: 1.6rem; }
-    .bg-hearts .heart:nth-child(2)  { left: 15%; animation-duration: 18s; animation-delay: 2s;    font-size: 2.2rem; }
-    .bg-hearts .heart:nth-child(3)  { left: 28%; animation-duration: 16s; animation-delay: 5s;    font-size: 1.8rem; }
-    .bg-hearts .heart:nth-child(4)  { left: 40%; animation-duration: 20s; animation-delay: 1s;    font-size: 2.4rem; }
-    .bg-hearts .heart:nth-child(5)  { left: 55%; animation-duration: 15s; animation-delay: 7s;    font-size: 1.5rem; }
-    .bg-hearts .heart:nth-child(6)  { left: 65%; animation-duration: 19s; animation-delay: 3s;    font-size: 2rem; }
-    .bg-hearts .heart:nth-child(7)  { left: 78%; animation-duration: 17s; animation-delay: 6s;    font-size: 1.7rem; }
-    .bg-hearts .heart:nth-child(8)  { left: 90%; animation-duration: 21s; animation-delay: 4s;    font-size: 2.1rem; }
-
-    .hero {
-      position: relative;
+    /* Hidden letter peeking out */
+    .envelope-letter {
+      position: absolute;
+      top: 25px;
+      left: 20px;
+      width: 160px;
+      height: 100px;
+      background: var(--white);
+      border-radius: 6px;
       z-index: 1;
-      margin-bottom: var(--space-3xl);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      transition: transform 0.5s var(--ease-out-expo);
     }
 
-    .hero-emoji {
-      font-size: 4rem;
-      margin-bottom: var(--space-lg);
-      animation: fadeInUp 0.8s var(--ease-out-expo);
+    .envelope-letter.peeking {
+      transform: translateY(-40px);
     }
 
-    .hero-title {
+    .envelope-tap-text {
+      font-size: var(--text-sm);
+      color: var(--pink-deep);
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      animation: pulse 2s var(--ease-in-out) infinite;
+      margin-top: var(--space-sm);
+    }
+
+    .envelope-tap-text span {
+      font-size: 0.8rem;
+    }
+
+    /* Page 1 title above envelope */
+    .page1-title {
       font-family: var(--font-display);
-      font-size: var(--text-3xl);
+      font-size: var(--text-xl);
       color: var(--cocoa);
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .moment-text {
+      font-family: "Georgia", "STSong", serif;
+      font-style: italic;
+      color: var(--pink-hot);
+      font-size: 1.3em;
       font-weight: 700;
-      letter-spacing: 0.02em;
-      margin-bottom: var(--space-md);
-      animation: fadeInUp 0.8s var(--ease-out-expo) 0.1s both;
+      letter-spacing: 0.03em;
+      text-shadow: 0 1px 3px rgba(255, 107, 138, 0.2);
     }
 
-    .hero-subtitle {
-      font-size: var(--text-lg);
+    /* ===================================
+       PAGE 2: FROM SOMEONE WHO CARES
+    =================================== */
+    #screen-cares {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: var(--space-xl);
+    }
+
+    .page2-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-xl);
+      width: 100%;
+    }
+
+    .cares-title {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      color: var(--cocoa);
+      line-height: 1.5;
+      animation: fadeInUp 0.6s var(--ease-out-expo) both;
+    }
+
+    .cares-highlight {
+      color: var(--pink-hot);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--pink-hot), var(--pink-deep));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .cares-sub {
+      font-size: var(--text-base);
       color: var(--taupe);
-      animation: fadeInUp 0.8s var(--ease-out-expo) 0.2s both;
+      animation: fadeInUp 0.6s var(--ease-out-expo) 0.15s both;
     }
 
-    .action-buttons {
+    /* Pixel chat bubble */
+    .pixel-chat {
+      background: var(--pink-hot);
+      border-radius: var(--radius-lg);
+      padding: var(--space-2xl) var(--space-xl);
       position: relative;
-      z-index: 1;
+      box-shadow:
+        4px 4px 0px #E86478,
+        var(--shadow-md);
+      image-rendering: pixelated;
+      animation: fadeInUp 0.6s var(--ease-out-expo) 0.3s both;
+      width: 100%;
+      max-width: 300px;
+      transition: transform 0.1s;
+    }
+
+    /* Chat bubble tail */
+    .pixel-chat::after {
+      content: '';
+      position: absolute;
+      bottom: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 16px solid transparent;
+      border-right: 16px solid transparent;
+      border-top: 18px solid var(--pink-hot);
+    }
+
+    .pixel-chat::before {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-top: 20px solid #E86478;
+    }
+
+    /* Pixel heart */
+    .pixel-heart {
+      font-family: var(--font-pixel);
+      font-size: 3rem;
+      color: var(--white);
+      animation: pixelGlow 2s ease-in-out infinite;
+      letter-spacing: 0.1em;
+      line-height: 1;
+      text-shadow:
+        2px 2px 0px rgba(255,255,255,0.5),
+        -2px 2px 0px rgba(255,255,255,0.3);
+    }
+
+    .pixel-heart-text {
+      font-family: var(--font-pixel);
+      font-size: var(--text-xs);
+      color: rgba(255,255,255,0.8);
+      margin-top: var(--space-sm);
+      letter-spacing: 0.1em;
+    }
+
+    .btn-continue {
+      width: 100%;
+      max-width: 300px;
+      animation: fadeInUp 0.6s var(--ease-out-expo) 0.45s both;
+    }
+
+    /* ===================================
+       PAGE 3: CAN WE EAT TOGETHER?
+    =================================== */
+    #screen-ask {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: var(--space-xl);
+    }
+
+    .ask-title {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      color: var(--cocoa);
+      line-height: 1.4;
+      animation: fadeInUp 0.5s var(--ease-out-expo) both;
+    }
+
+    .ask-sub {
+      font-size: var(--text-sm);
+      color: var(--taupe);
+      line-height: 1.6;
+      animation: fadeInUp 0.5s var(--ease-out-expo) 0.1s both;
+    }
+
+    .heartbeat-icon {
+      display: inline-block;
+      animation: heartBeat 1.5s ease-in-out infinite;
+      font-size: 1.4rem;
+      vertical-align: middle;
+    }
+
+    .ask-buttons {
       width: 100%;
       display: flex;
       flex-direction: column;
       gap: var(--space-lg);
-      animation: fadeInUp 0.8s var(--ease-out-expo) 0.3s both;
+      animation: fadeInUp 0.5s var(--ease-out-expo) 0.2s both;
+    }
+
+    .btn-willing {
+      background: var(--cherry);
+      color: var(--white);
+      box-shadow: var(--shadow-button);
+      font-size: 1.2rem;
+      height: 60px;
+    }
+
+    .btn-willing:active {
+      background: var(--pink-deep);
+    }
+
+    .btn-think {
+      background: var(--white);
+      color: var(--taupe);
+      border: 2px solid var(--pink-mid);
+      font-size: 1.1rem;
+      height: 54px;
+    }
+
+    .btn-think:active {
+      background: var(--blush);
     }
 
     /* ===================================
-       BUTTONS
+       PAGE 4: PLACE
+    =================================== */
+    #screen-place {
+      justify-content: flex-start;
+      align-items: center;
+      text-align: center;
+      padding-top: var(--space-3xl);
+    }
+
+    .place-title {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      color: var(--cocoa);
+      margin-bottom: var(--space-xs);
+    }
+
+    .place-sub {
+      font-size: var(--text-sm);
+      color: var(--taupe);
+      margin-bottom: var(--space-2xl);
+    }
+
+    .place-options {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+      flex: 1;
+    }
+
+    .place-option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+      background: var(--white);
+      border: 2px solid var(--pink-mid);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      cursor: pointer;
+      transition: all 0.2s var(--ease-in-out);
+      text-align: left;
+      -webkit-tap-highlight-color: transparent;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .place-option:active {
+      background: var(--blush);
+      transform: scale(0.98);
+    }
+
+    .place-option.selected {
+      background: var(--cherry);
+      border-color: var(--cherry);
+      color: var(--white);
+      box-shadow: var(--shadow-button);
+    }
+
+    .place-option.selected .place-option-sub {
+      color: rgba(255,255,255,0.8);
+    }
+
+    .place-option-emoji {
+      font-size: 2.5rem;
+      flex-shrink: 0;
+    }
+
+    .place-option-info {
+      flex: 1;
+    }
+
+    .place-option-label {
+      font-size: var(--text-lg);
+      font-weight: 600;
+    }
+
+    .place-option-sub {
+      font-size: var(--text-sm);
+      color: var(--taupe);
+      margin-top: var(--space-xs);
+    }
+
+    .btn-next-page {
+      width: 100%;
+      max-width: 300px;
+      margin-top: var(--space-xl);
+      margin-bottom: var(--space-xl);
+    }
+
+    /* ===================================
+       PAGE 5: FOOD
+    =================================== */
+    #screen-food {
+      justify-content: flex-start;
+      align-items: center;
+      text-align: center;
+      padding-top: var(--space-3xl);
+    }
+
+    .food-title {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      color: var(--cocoa);
+      margin-bottom: var(--space-xs);
+    }
+
+    .food-sub {
+      font-size: var(--text-sm);
+      color: var(--taupe);
+      margin-bottom: var(--space-2xl);
+    }
+
+    .food-chip-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      justify-content: center;
+      flex: 1;
+      align-content: flex-start;
+      overflow-y: auto;
+      padding: var(--space-xs);
+      width: 100%;
+    }
+
+    .food-chip {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: var(--space-md) var(--space-xl);
+      background: var(--white);
+      border: 2px solid var(--pink-mid);
+      border-radius: var(--radius-full);
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      color: var(--cocoa);
+      cursor: pointer;
+      transition: all 0.2s var(--ease-in-out);
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+    }
+
+    .food-chip:active {
+      transform: scale(0.95);
+    }
+
+    .food-chip.selected {
+      background: var(--cherry);
+      color: var(--white);
+      border-color: var(--cherry);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ===================================
+       PAGE 6: TIME
+    =================================== */
+    #screen-time {
+      justify-content: flex-start;
+      align-items: center;
+      text-align: center;
+      padding-top: var(--space-3xl);
+    }
+
+    .time-title {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      color: var(--cocoa);
+      margin-bottom: var(--space-xs);
+    }
+
+    .time-sub {
+      font-size: var(--text-sm);
+      color: var(--taupe);
+      margin-bottom: var(--space-2xl);
+    }
+
+    .time-options {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+      flex: 1;
+    }
+
+    .time-option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+      background: var(--white);
+      border: 2px solid var(--pink-mid);
+      border-radius: var(--radius-xl);
+      padding: var(--space-lg) var(--space-xl);
+      cursor: pointer;
+      transition: all 0.2s var(--ease-in-out);
+      -webkit-tap-highlight-color: transparent;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .time-option:active {
+      transform: scale(0.98);
+    }
+
+    .time-option.selected {
+      background: var(--cherry);
+      border-color: var(--cherry);
+      box-shadow: var(--shadow-button);
+    }
+
+    .time-option.selected .time-label,
+    .time-option.selected .time-date {
+      color: var(--white);
+    }
+
+    .time-option-emoji {
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .time-option-info {
+      flex: 1;
+      text-align: left;
+    }
+
+    .time-label {
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--cocoa);
+    }
+
+    .time-date {
+      font-size: var(--text-xs);
+      color: var(--taupe);
+      margin-top: 2px;
+    }
+
+    /* ===================================
+       PAGE 7: FINAL CARD
+    =================================== */
+    #screen-final {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .final-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--space-2xl) var(--space-xl);
+      box-shadow: var(--shadow-card);
+      transform: rotate(-0.5deg);
+      width: 100%;
+      position: relative;
+      animation: fadeInUp 0.6s var(--ease-out-expo) both;
+    }
+
+    .final-card::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      border: 2px dashed var(--pink-mid);
+      border-radius: var(--radius-md);
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .final-emoji {
+      font-size: 3rem;
+      margin-bottom: var(--space-lg);
+    }
+
+    .final-title {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      color: var(--cocoa);
+      margin-bottom: var(--space-lg);
+    }
+
+    .final-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md) 0;
+      border-bottom: 1px solid var(--blush);
+    }
+
+    .final-item:last-child {
+      border-bottom: none;
+    }
+
+    .final-item-emoji {
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+
+    .final-item-info {
+      text-align: left;
+    }
+
+    .final-item-label {
+      font-size: var(--text-xs);
+      color: var(--taupe);
+    }
+
+    .final-item-value {
+      font-size: var(--text-base);
+      color: var(--cocoa);
+      font-weight: 600;
+    }
+
+    .final-heart {
+      font-size: 2rem;
+      margin-top: var(--space-lg);
+      animation: heartBeat 1.5s ease-in-out infinite;
+    }
+
+    .screenshot-hint {
+      margin-top: var(--space-xl);
+      font-size: var(--text-sm);
+      color: var(--taupe);
+    }
+
+    /* ===================================
+       SHARED BUTTON STYLES
     =================================== */
     .btn {
       display: flex;
@@ -261,13 +834,9 @@
       user-select: none;
       -webkit-tap-highlight-color: transparent;
       outline: none;
-      position: relative;
-      overflow: hidden;
     }
 
-    .btn:active {
-      transform: scale(0.97);
-    }
+    .btn:active { transform: scale(0.97); }
 
     .btn:focus-visible {
       outline: 3px solid var(--pink-deep);
@@ -280,462 +849,35 @@
       pointer-events: none;
     }
 
-    .btn-accept {
+    .btn-primary {
       background: var(--cherry);
       color: var(--white);
       box-shadow: var(--shadow-button);
-      font-size: 1.3rem;
-      height: 64px;
-      letter-spacing: 0.04em;
     }
 
-    .btn-accept:active {
+    .btn-primary:active {
       background: var(--pink-deep);
     }
 
-    .btn-decline {
-      background: var(--white);
-      color: var(--taupe);
-      border: 2px solid var(--pink-mid);
-      font-size: 1.3rem;
-      height: 64px;
-      letter-spacing: 0.04em;
-    }
-
-    .btn-decline:active {
-      background: var(--blush);
-    }
-
-    .btn-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-xs);
-      padding: var(--space-md) var(--space-xl);
-      background: var(--white);
-      color: var(--cocoa);
-      border: 2px solid var(--pink-mid);
-      border-radius: var(--radius-full);
-      font-family: var(--font-body);
-      font-size: var(--text-base);
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s var(--ease-in-out);
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      white-space: nowrap;
-      outline: none;
-    }
-
-    .btn-pill:focus-visible {
-      outline: 3px solid var(--pink-deep);
-      outline-offset: 2px;
-    }
-
-    .btn-pill.selected {
-      background: var(--cherry);
-      color: var(--white);
-      border-color: var(--cherry);
-      box-shadow: var(--shadow-sm);
-    }
-
-    /* ===================================
-       DECLINE SCREEN
-    =================================== */
-    #screen-decline {
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-    }
-
-    .decline-content {
-      animation: fadeInUp 0.6s var(--ease-out-expo);
-    }
-
-    .decline-emoji {
-      font-size: 5rem;
-      margin-bottom: var(--space-xl);
-    }
-
-    .decline-title {
-      font-family: var(--font-display);
-      font-size: var(--text-2xl);
-      color: var(--cocoa);
-      margin-bottom: var(--space-md);
-    }
-
-    .decline-message {
-      font-size: var(--text-lg);
-      color: var(--taupe);
-      margin-bottom: var(--space-sm);
-    }
-
-    .decline-sub {
-      font-size: var(--text-base);
-      color: var(--taupe);
-      opacity: 0.7;
-    }
-
-    /* ===================================
-       ACCEPT SCREEN — PROGRESS BAR
-    =================================== */
-    .progress-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0;
-      margin-bottom: var(--space-2xl);
-      padding: var(--space-md) 0;
-    }
-
-    .progress-dot {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: var(--white);
-      border: 2px solid var(--pink-mid);
-      transition: all var(--duration-normal) var(--ease-in-out);
-      flex-shrink: 0;
-    }
-
-    .progress-dot.active {
-      background: var(--cherry);
-      border-color: var(--cherry);
-      box-shadow: 0 0 0 4px rgba(255, 182, 193, 0.3);
-      width: 16px;
-      height: 16px;
-    }
-
-    .progress-dot.done {
-      background: var(--cherry);
-      border-color: var(--cherry);
-    }
-
-    .progress-line {
-      width: 32px;
-      height: 2px;
-      background: var(--pink-mid);
-      flex-shrink: 0;
-    }
-
-    .progress-line.done {
-      background: var(--cherry);
-    }
-
-    /* ===================================
-       STEPS
-    =================================== */
-    .step {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      animation: fadeInUp var(--duration-normal) var(--ease-out-expo);
-    }
-
-    .step--hidden {
-      display: none !important;
-    }
-
-    .step-question {
-      text-align: center;
-      margin-bottom: var(--space-xl);
-    }
-
-    .step-emoji {
-      font-size: 3rem;
-      display: block;
-      margin-bottom: var(--space-md);
-    }
-
-    .step-question h3 {
-      font-family: var(--font-display);
-      font-size: var(--text-xl);
-      color: var(--cocoa);
-      margin-bottom: var(--space-xs);
-    }
-
-    .step-question p {
-      font-size: var(--text-sm);
-      color: var(--taupe);
-    }
-
-    /* ===================================
-       CHIP GRID
-    =================================== */
-    .chip-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-md);
-      justify-content: center;
-      margin-bottom: var(--space-xl);
-      flex: 1;
-      align-content: flex-start;
-      overflow-y: auto;
-      padding: var(--space-xs);
-    }
-
-    /* ===================================
-       STEP ACTIONS
-    =================================== */
-    .step-actions {
-      display: flex;
-      gap: var(--space-md);
-      padding-top: var(--space-lg);
-      flex-shrink: 0;
-    }
-
-    .btn-back {
+    .btn-ghost {
       background: none;
       color: var(--taupe);
-      border: none;
-      font-size: var(--text-base);
-      flex-shrink: 0;
-      width: auto;
-      padding: 0 var(--space-lg);
+      height: auto;
+      font-size: var(--text-sm);
+      font-weight: 400;
     }
 
-    .btn-back:active {
+    .btn-ghost:active {
       opacity: 0.6;
     }
 
-    .btn-next {
-      background: var(--cherry);
-      color: var(--white);
-      box-shadow: var(--shadow-button);
-      flex: 1;
-    }
-
-    .btn-next:active {
-      background: var(--pink-deep);
-    }
-
-    /* ===================================
-       CALENDAR
-    =================================== */
-    .calendar {
-      background: var(--white);
-      border-radius: var(--radius-lg);
-      padding: var(--space-lg);
-      box-shadow: var(--shadow-md);
-      margin-bottom: var(--space-xl);
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .calendar-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: var(--space-lg);
-    }
-
-    .calendar-nav {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: none;
-      background: var(--blush);
-      color: var(--cocoa);
-      font-size: var(--text-lg);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-      flex-shrink: 0;
-    }
-
-    .calendar-nav:active {
-      background: var(--pink-mid);
-    }
-
-    .calendar-month {
-      font-family: var(--font-display);
-      font-size: var(--text-lg);
-      font-weight: 600;
-      color: var(--cocoa);
-    }
-
-    .calendar-weekdays {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      text-align: center;
-      margin-bottom: var(--space-sm);
-    }
-
-    .calendar-weekdays span {
-      font-size: var(--text-xs);
-      color: var(--taupe);
-      font-weight: 500;
-      padding: var(--space-xs) 0;
-    }
-
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-    }
-
-    .calendar-day {
-      aspect-ratio: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: none;
-      background: none;
-      font-family: var(--font-body);
-      font-size: var(--text-sm);
-      color: var(--cocoa);
-      cursor: pointer;
-      border-radius: 50%;
-      transition: all 0.15s var(--ease-in-out);
-      min-width: 36px;
-      min-height: 36px;
-    }
-
-    .calendar-day:focus-visible {
-      outline: 2px solid var(--pink-deep);
-      outline-offset: -2px;
-    }
-
-    .calendar-day:hover:not(:disabled) {
-      background: var(--blush);
-    }
-
-    .calendar-day:disabled {
-      color: #ddd;
-      cursor: default;
-    }
-
-    .calendar-day--selected {
-      background: var(--cherry) !important;
-      color: var(--white) !important;
-      font-weight: 600;
-      box-shadow: 0 2px 8px rgba(255, 182, 193, 0.4);
-    }
-
-    .calendar-day--today {
-      font-weight: 700;
-      color: var(--pink-deep);
-    }
-
-    .calendar-selected-label {
-      text-align: center;
-      font-size: var(--text-sm);
-      color: var(--pink-deep);
-      margin-top: var(--space-md);
-      font-weight: 500;
-      min-height: 1.5em;
-    }
-
-    /* ===================================
-       SUMMARY CARD
-    =================================== */
-    .summary-card {
-      background: var(--white);
-      border-radius: var(--radius-lg);
-      padding: var(--space-2xl) var(--space-xl);
-      box-shadow: var(--shadow-card);
-      transform: rotate(-0.8deg);
-      margin-bottom: var(--space-xl);
-      position: relative;
-    }
-
-    .summary-card::before {
-      content: '';
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      right: 12px;
-      bottom: 12px;
-      border: 2px dashed var(--pink-mid);
-      border-radius: var(--radius-md);
-      pointer-events: none;
-      opacity: 0.5;
-    }
-
-    .summary-date {
-      text-align: center;
-      margin-bottom: var(--space-lg);
-    }
-
-    .summary-date-label {
-      font-size: var(--text-xs);
-      color: var(--taupe);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: var(--space-xs);
-    }
-
-    .summary-date-value {
-      font-family: var(--font-display);
-      font-size: var(--text-2xl);
-      font-weight: 700;
-      color: var(--cocoa);
-    }
-
-    .summary-divider {
-      width: 60px;
-      height: 2px;
-      background: var(--cherry);
-      margin: var(--space-lg) auto;
-      border-radius: 1px;
-    }
-
-    .summary-section {
-      margin-bottom: var(--space-lg);
-    }
-
-    .summary-section h4 {
-      font-size: var(--text-sm);
-      color: var(--taupe);
-      margin-bottom: var(--space-md);
-      text-align: center;
-    }
-
-    .summary-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-sm);
-      justify-content: center;
-    }
-
-    .summary-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: var(--space-sm) var(--space-md);
-      background: var(--blush);
-      border-radius: var(--radius-full);
-      font-size: var(--text-sm);
-      color: var(--cocoa);
-    }
-
-    .summary-footer {
-      text-align: center;
+    /* Back link */
+    .back-link {
       margin-top: var(--space-lg);
     }
 
-    .summary-footer .heart-icon {
-      font-size: 1.5rem;
-      display: block;
-      margin-bottom: var(--space-xs);
-    }
-
-    .screenshot-hint {
-      text-align: center;
-      font-size: var(--text-sm);
-      color: var(--taupe);
-      margin-bottom: var(--space-lg);
-    }
-
-    .screenshot-hint .camera {
-      font-size: 1.2rem;
-    }
-
     /* ===================================
-       NOSCRIPT FALLBACK
+       NOSCRIPT
     =================================== */
     noscript {
       display: block;
@@ -745,196 +887,233 @@
       color: var(--cocoa);
     }
 
-    /* ===================================
-       REDUCED MOTION
-    =================================== */
+    /* Reduced motion */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
-
-      .bg-hearts {
-        display: none;
-      }
     }
 
-    /* ===================================
-       RESPONSIVE
-    =================================== */
+    /* Small screens */
     @media (max-width: 360px) {
       :root {
-        --text-3xl: 1.75rem;
         --text-2xl: 1.5rem;
         --text-xl: 1.125rem;
       }
-
-      .calendar-day {
-        min-width: 32px;
-        min-height: 32px;
-        font-size: var(--text-xs);
+      .envelope-wrapper {
+        width: 160px;
+        height: 112px;
       }
-
-      .btn-pill {
-        padding: var(--space-sm) var(--space-lg);
-        font-size: var(--text-sm);
+      .envelope-body {
+        width: 160px;
+        height: 104px;
       }
-
-      .summary-card {
-        padding: var(--space-xl) var(--space-lg);
+      .envelope-flap {
+        border-left-width: 80px;
+        border-right-width: 80px;
+        border-top-width: 60px;
       }
-    }
-
-    /* ===================================
-       SCROLLBAR
-    =================================== */
-    .chip-grid::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .chip-grid::-webkit-scrollbar-thumb {
-      background: var(--pink-mid);
-      border-radius: 2px;
-    }
-
-    .chip-grid::-webkit-scrollbar-track {
-      background: transparent;
+      .envelope-letter {
+        width: 128px;
+        height: 80px;
+        left: 16px;
+        top: 20px;
+      }
+      .envelope-seal {
+        top: -44px;
+      }
+      .pixel-heart {
+        font-size: 2.2rem;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- ===================================
-     FLOATING HEARTS BACKGROUND
-  =================================== -->
-  <div class="bg-hearts" id="bg-hearts" aria-hidden="true">
-    <span class="heart">💕</span>
-    <span class="heart">💗</span>
-    <span class="heart">💖</span>
-    <span class="heart">💝</span>
-    <span class="heart">🌸</span>
-    <span class="heart">💕</span>
-    <span class="heart">💗</span>
-    <span class="heart">✨</span>
-  </div>
-
-  <!-- ===================================
-     APP CONTAINER
-  =================================== -->
   <div id="app">
-    <!-- LANDING SCREEN -->
-    <section class="screen" id="screen-landing">
-      <div class="hero">
-        <div class="hero-emoji">💌</div>
-        <h1 class="hero-title">Date Invitation</h1>
-        <p class="hero-subtitle">想和你共度美好的一天</p>
-      </div>
-      <div class="action-buttons">
-        <button class="btn btn-accept" data-action="accept" type="button">
-          <span>💚</span>
-          <span>Accept</span>
-        </button>
-        <button class="btn btn-decline" data-action="decline" type="button">
-          <span>💔</span>
-          <span>Decline</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- DECLINE SCREEN -->
-    <section class="screen screen--hidden" id="screen-decline">
-      <div class="decline-content">
-        <div class="decline-emoji">🥺</div>
-        <h2 class="decline-title">没关系</h2>
-        <p class="decline-message">下次再约哦～</p>
-        <p class="decline-sub">期待与你相遇的那一天 💕</p>
-      </div>
-    </section>
-
-    <!-- ACCEPT SCREEN -->
-    <section class="screen screen--hidden" id="screen-accept">
-      <!-- Progress Bar -->
-      <nav class="progress-bar" id="progress-bar" aria-label="步骤进度">
-        <div class="progress-dot active" data-progress="1"></div>
-        <div class="progress-line" data-progress-line="1"></div>
-        <div class="progress-dot" data-progress="2"></div>
-        <div class="progress-line" data-progress-line="2"></div>
-        <div class="progress-dot" data-progress="3"></div>
-        <div class="progress-line" data-progress-line="3"></div>
-        <div class="progress-dot" data-progress="4"></div>
-      </nav>
-
-      <!-- Step 1: Date Picker -->
-      <div class="step" id="step-1">
-        <div class="step-question">
-          <span class="step-emoji">📅</span>
-          <h3>哪一天约会呢？</h3>
-          <p>选一个你最喜欢的日子吧</p>
-        </div>
-        <div class="calendar" id="calendar">
-          <div class="calendar-header">
-            <button class="calendar-nav" data-calendar-action="prev" type="button" aria-label="上个月">◂</button>
-            <span class="calendar-month" id="calendar-month-label"></span>
-            <button class="calendar-nav" data-calendar-action="next" type="button" aria-label="下个月">▸</button>
-          </div>
-          <div class="calendar-weekdays">
-            <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
-          </div>
-          <div class="calendar-grid" id="calendar-grid"></div>
-          <div class="calendar-selected-label" id="calendar-selected-label"></div>
-        </div>
-        <div class="step-actions">
-          <button class="btn btn-back" data-action="back" type="button">← 返回</button>
-          <button class="btn btn-next" data-action="next" type="button" disabled id="btn-next-1">下一步 →</button>
-        </div>
-      </div>
-
-      <!-- Step 2: Activities -->
-      <div class="step step--hidden" id="step-2">
-        <div class="step-question">
-          <span class="step-emoji">🎯</span>
-          <h3>想做什么呢？</h3>
-          <p>选几个喜欢的活动吧（可多选）</p>
-        </div>
-        <div class="chip-grid" id="activities-grid"></div>
-        <div class="step-actions">
-          <button class="btn btn-back" data-action="back" type="button">← 返回</button>
-          <button class="btn btn-next" data-action="next" type="button" disabled id="btn-next-2">下一步 →</button>
-        </div>
-      </div>
-
-      <!-- Step 3: Food Types -->
-      <div class="step step--hidden" id="step-3">
-        <div class="step-question">
-          <span class="step-emoji">🍽️</span>
-          <h3>想吃什么？</h3>
-          <p>选几种想吃的美食吧（可多选）</p>
-        </div>
-        <div class="chip-grid" id="food-grid"></div>
-        <div class="step-actions">
-          <button class="btn btn-back" data-action="back" type="button">← 返回</button>
-          <button class="btn btn-next" data-action="next" type="button" disabled id="btn-next-3">下一步 →</button>
-        </div>
-      </div>
-
-      <!-- Step 4: Summary Card -->
-      <div class="step step--hidden" id="step-4">
-        <div class="step-question">
-          <span class="step-emoji">✨</span>
-          <h3>约会计划确认</h3>
-        </div>
-        <div class="summary-card" id="summary-card"></div>
-        <p class="screenshot-hint">
-          <span class="camera">📸</span> 截图发给对方确认吧～
+    <!-- ===================================
+       PAGE 1: ENVELOPE
+    =================================== -->
+    <section class="screen" id="screen-envelope">
+      <div class="page1-content">
+        <p class="page1-title">
+          想约你吃顿好吃的<br>准备了一个小<span class="moment-text">Moment</span>
         </p>
-        <div class="step-actions">
-          <button class="btn btn-back" data-action="back" type="button">← 返回修改</button>
+        <div class="envelope-wrapper" id="envelope-wrapper">
+          <div class="envelope">
+            <div class="envelope-seal" id="envelope-seal">💌</div>
+            <div class="envelope-letter" id="envelope-letter">💝</div>
+            <div class="envelope-flap" id="envelope-flap"></div>
+            <div class="envelope-body"></div>
+          </div>
+        </div>
+        <p class="envelope-tap-text">👆 轻触打开</p>
+      </div>
+    </section>
+
+    <!-- ===================================
+       PAGE 2: FROM SOMEONE WHO CARES
+    =================================== -->
+    <section class="screen screen--hidden" id="screen-cares">
+      <div class="page2-content fade-in-up">
+        <h2 class="cares-title">
+          来自一个<br>很<span class="cares-highlight">在意你</span>的人
+        </h2>
+        <p class="cares-sub">TA想认真约你吃顿好吃的</p>
+        <div class="pixel-chat">
+          <div class="pixel-heart">♡♥♡</div>
+          <div class="pixel-heart-text">* 心跳加速中 *</div>
+        </div>
+        <button class="btn btn-primary btn-continue" data-action="to-page3" type="button">继续 →</button>
+      </div>
+    </section>
+
+    <!-- ===================================
+       PAGE 3: CAN WE EAT TOGETHER?
+    =================================== -->
+    <section class="screen screen--hidden" id="screen-ask">
+      <div class="fade-in-up" style="display:flex;flex-direction:column;align-items:center;gap:var(--space-xl);width:100%;">
+        <h2 class="ask-title">可以一起去吃饭嘛？！</h2>
+        <p class="ask-sub">
+          系统检测到，对方已经紧张到<br><span class="heartbeat-icon">💗</span> 心跳加速了
+        </p>
+        <div class="ask-buttons">
+          <button class="btn btn-willing" data-action="willing" type="button">愿意 💕</button>
+          <button class="btn btn-think" data-action="think" type="button">再想想 🤔</button>
         </div>
       </div>
+    </section>
+
+    <!-- ===================================
+       PAGE 4: PLACE
+    =================================== -->
+    <section class="screen screen--hidden" id="screen-place">
+      <div class="fade-in-up" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+        <h2 class="place-title">在哪里见面呢？</h2>
+        <p class="place-sub">选一个你喜欢的地方吧</p>
+        <div class="place-options" id="place-options">
+          <div class="place-option" data-place="mall">
+            <div class="place-option-emoji">🏬</div>
+            <div class="place-option-info">
+              <div class="place-option-label">大商场</div>
+              <div class="place-option-sub">逛街吃饭一条龙</div>
+            </div>
+          </div>
+          <div class="place-option" data-place="cafe">
+            <div class="place-option-emoji">☕</div>
+            <div class="place-option-info">
+              <div class="place-option-label">咖啡馆</div>
+              <div class="place-option-sub">安静温馨聊聊天</div>
+            </div>
+          </div>
+          <div class="place-option" data-place="park">
+            <div class="place-option-emoji">🌳</div>
+            <div class="place-option-info">
+              <div class="place-option-label">公园附近</div>
+              <div class="place-option-sub">安静浪漫氛围好</div>
+            </div>
+          </div>
+          <div class="place-option" data-place="anywhere">
+            <div class="place-option-emoji">💫</div>
+            <div class="place-option-info">
+              <div class="place-option-label">哪里都可以</div>
+              <div class="place-option-sub">和你在一起就行</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-next-page" data-action="to-page5" disabled id="btn-place-next" type="button">下一步 →</button>
+      </div>
+    </section>
+
+    <!-- ===================================
+       PAGE 5: FOOD
+    =================================== -->
+    <section class="screen screen--hidden" id="screen-food">
+      <div class="fade-in-up" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+        <h2 class="food-title">想吃什么？</h2>
+        <p class="food-sub">选多少都可以哦～</p>
+        <div class="food-chip-grid" id="food-grid"></div>
+        <button class="btn btn-primary btn-next-page" data-action="to-page6" disabled id="btn-food-next" type="button">下一步 →</button>
+      </div>
+    </section>
+
+    <!-- ===================================
+       PAGE 6: TIME
+    =================================== -->
+    <section class="screen screen--hidden" id="screen-time">
+      <div class="fade-in-up" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+        <h2 class="time-title">什么时候呢？</h2>
+        <p class="time-sub">选个方便的时间吧</p>
+        <div class="time-options" id="time-options">
+          <div class="time-option" data-time="tonight">
+            <div class="time-option-emoji">🌙</div>
+            <div class="time-option-info">
+              <div class="time-label">今天晚上</div>
+              <div class="time-date">就是现在！迫不及待</div>
+            </div>
+          </div>
+          <div class="time-option" data-time="tomorrow">
+            <div class="time-option-emoji">☀️</div>
+            <div class="time-option-info">
+              <div class="time-label">明天下午</div>
+              <div class="time-date">明天见，期待值拉满</div>
+            </div>
+          </div>
+          <div class="time-option" data-time="weekend">
+            <div class="time-option-emoji">🎉</div>
+            <div class="time-option-info">
+              <div class="time-label">周末下午</div>
+              <div class="time-date">周末放松，慢慢享受</div>
+            </div>
+          </div>
+          <div class="time-option" data-time="nextweek">
+            <div class="time-option-emoji">📅</div>
+            <div class="time-option-info">
+              <div class="time-label">下周都可以</div>
+              <div class="time-date">你定具体哪天～</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-next-page" data-action="show-final" disabled id="btn-time-next" type="button">生成约会卡片 ✨</button>
+      </div>
+    </section>
+
+    <!-- ===================================
+       PAGE 7: FINAL CARD
+    =================================== -->
+    <section class="screen screen--hidden" id="screen-final">
+      <div class="final-card">
+        <div class="final-emoji">💌</div>
+        <h2 class="final-title">约会计划</h2>
+        <div class="final-item">
+          <div class="final-item-emoji">📍</div>
+          <div class="final-item-info">
+            <div class="final-item-label">见面地点</div>
+            <div class="final-item-value" id="final-place">-</div>
+          </div>
+        </div>
+        <div class="final-item">
+          <div class="final-item-emoji">🍽️</div>
+          <div class="final-item-info">
+            <div class="final-item-label">想吃什么</div>
+            <div class="final-item-value" id="final-food">-</div>
+          </div>
+        </div>
+        <div class="final-item">
+          <div class="final-item-emoji">🗓️</div>
+          <div class="final-item-info">
+            <div class="final-item-label">约会时间</div>
+            <div class="final-item-value" id="final-time">-</div>
+          </div>
+        </div>
+        <div class="final-heart">💕</div>
+      </div>
+      <p class="screenshot-hint">📸 截图发给TA确认吧～</p>
+      <button class="btn btn-ghost back-link" data-action="restart" type="button">重新选择</button>
     </section>
   </div>
 
-  <!-- Fallback for noscript -->
   <noscript>
     <div>💌 Date Invitation</div>
     <p>请启用 JavaScript 来查看约会邀请～</p>
@@ -945,459 +1124,285 @@
       'use strict';
 
       // ============================
-      // CONSTANTS
+      // FOOD DATA
       // ============================
-      var ACTIVITIES = [
-        { id: 'movie',      label: '看电影',   emoji: '🎬' },
-        { id: 'park',       label: '逛公园',   emoji: '🌳' },
-        { id: 'coffee',     label: '喝咖啡',   emoji: '☕' },
-        { id: 'shopping',   label: '逛街',     emoji: '🛍️' },
-        { id: 'gaming',     label: '打游戏',   emoji: '🎮' },
-        { id: 'craft',      label: '做手工',   emoji: '🎨' },
-        { id: 'exhibition', label: '看展览',   emoji: '🖼️' },
-        { id: 'cooking',    label: '一起做饭', emoji: '👨‍🍳' },
-        { id: 'sports',     label: '运动',     emoji: '⚽' },
-        { id: 'travel',     label: '旅行',     emoji: '✈️' }
+      var FOODS = [
+        { id: 'chinese',    label: '中餐',     emoji: '🥢' },
+        { id: 'japanese',   label: '日料',     emoji: '🍣' },
+        { id: 'korean',     label: '韩料',     emoji: '🥩' },
+        { id: 'hotpot',     label: '火锅',     emoji: '🍲' },
+        { id: 'bbq',        label: '烧烤',     emoji: '🍖' },
+        { id: 'italian',    label: '意大利菜', emoji: '🍝' },
+        { id: 'thai',       label: '泰国菜',   emoji: '🍜' },
+        { id: 'french',     label: '法餐',     emoji: '🥐' },
+        { id: 'dessert',    label: '甜品下午茶', emoji: '🍰' },
+        { id: 'streetfood', label: '小吃夜市', emoji: '🍢' },
+        { id: 'buffet',     label: '自助餐',   emoji: '🍽️' },
+        { id: 'seafood',    label: '海鲜',     emoji: '🦞' },
+        { id: 'western',    label: '西餐',     emoji: '🥩' },
+        { id: 'vietnamese', label: '越南菜',   emoji: '🍜' },
+        { id: 'vegetarian', label: '素食',     emoji: '🥗' }
       ];
 
-      var FOOD_TYPES = [
-        { id: 'chinese',    label: '中餐',       emoji: '🥢' },
-        { id: 'japanese',   label: '日料',       emoji: '🍣' },
-        { id: 'korean',     label: '韩料',       emoji: '🥩' },
-        { id: 'western',    label: '西餐',       emoji: '🥩' },
-        { id: 'hotpot',     label: '火锅',       emoji: '🍲' },
-        { id: 'bbq',        label: '烧烤',       emoji: '🍖' },
-        { id: 'thai',       label: '泰国菜',     emoji: '🍜' },
-        { id: 'vietnamese', label: '越南菜',     emoji: '🍜' },
-        { id: 'italian',    label: '意大利菜',   emoji: '🍝' },
-        { id: 'french',     label: '法餐',       emoji: '🥐' },
-        { id: 'dessert',    label: '甜品下午茶', emoji: '🍰' },
-        { id: 'streetfood', label: '小吃夜市',   emoji: '🍢' },
-        { id: 'buffet',     label: '自助餐',     emoji: '🍽️' },
-        { id: 'seafood',    label: '海鲜',       emoji: '🦞' },
-        { id: 'vegetarian', label: '素食',       emoji: '🥗' }
-      ];
+      var PLACE_LABELS = {
+        'mall': '大商场',
+        'cafe': '咖啡馆',
+        'park': '公园附近',
+        'anywhere': '哪里都可以'
+      };
+
+      var TIME_LABELS = {
+        'tonight': '今天晚上',
+        'tomorrow': '明天下午',
+        'weekend': '周末下午',
+        'nextweek': '下周都可以'
+      };
 
       // ============================
       // STATE
       // ============================
       var state = {
-        screen: 'landing',
-        step: 1,
-        selectedDate: null,
-        selectedActivities: [],
-        selectedFoodTypes: []
+        page: 'envelope',
+        selectedPlace: null,
+        selectedFoods: [],
+        selectedTime: null,
+        envelopeOpened: false
       };
-
-      // Calendar internal state
-      var calYear, calMonth;
-      var today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      // ============================
-      // DOM REFS
-      // ============================
-      var appEl = document.getElementById('app');
-      var screenLanding = document.getElementById('screen-landing');
-      var screenDecline = document.getElementById('screen-decline');
-      var screenAccept = document.getElementById('screen-accept');
-      var bgHearts = document.getElementById('bg-hearts');
-      var calendarGrid = document.getElementById('calendar-grid');
-      var calendarMonthLabel = document.getElementById('calendar-month-label');
-      var calendarSelectedLabel = document.getElementById('calendar-selected-label');
-      var activitiesGrid = document.getElementById('activities-grid');
-      var foodGrid = document.getElementById('food-grid');
-      var summaryCard = document.getElementById('summary-card');
-      var progressBar = document.getElementById('progress-bar');
-
-      // ============================
-      // UTILITY
-      // ============================
-      function formatDate(isoStr) {
-        if (!isoStr) return '';
-        var parts = isoStr.split('-');
-        return parts[0] + '年' + parseInt(parts[1]) + '月' + parseInt(parts[2]) + '日';
-      }
-
-      function getWeekdayCN(isoStr) {
-        var d = new Date(isoStr + 'T00:00:00');
-        var days = ['日', '一', '二', '三', '四', '五', '六'];
-        return '星期' + days[d.getDay()];
-      }
-
-      function el(tag, attrs, children) {
-        var e = document.createElement(tag);
-        if (attrs) {
-          for (var k in attrs) {
-            if (k === 'className') e.className = attrs[k];
-            else if (k === 'disabled') { if (attrs[k]) e.setAttribute('disabled', ''); }
-            else if (k === 'type') e.setAttribute('type', attrs[k]);
-            else if (k.startsWith('data-')) e.setAttribute(k, attrs[k]);
-            else if (k === 'textContent') e.textContent = attrs[k];
-            else if (k === 'innerHTML') e.innerHTML = attrs[k];
-            else e.setAttribute(k, attrs[k]);
-          }
-        }
-        if (children && Array.isArray(children)) {
-          children.forEach(function(c) { if (c) e.appendChild(c); });
-        }
-        return e;
-      }
 
       // ============================
       // NAVIGATION
       // ============================
-      function navigate(targetScreen, targetStep, direction) {
-        targetStep = targetStep || 1;
-        direction = direction || 'forward';
-        var prevScreen = state.screen;
-
-        state.screen = targetScreen;
-        if (targetScreen === 'accept') {
-          state.step = targetStep;
-        }
+      function showPage(pageName, fromPage) {
+        state.page = pageName;
 
         // Hide all screens
         var screens = document.querySelectorAll('.screen');
         for (var i = 0; i < screens.length; i++) {
           screens[i].classList.add('screen--hidden');
-          screens[i].classList.remove('slide-in-right', 'slide-in-left', 'fade-in', 'fade-in-up');
         }
 
         // Show target screen
-        var targetEl = document.getElementById('screen-' + targetScreen);
-        targetEl.classList.remove('screen--hidden');
+        var screenMap = {
+          'envelope': 'screen-envelope',
+          'cares': 'screen-cares',
+          'ask': 'screen-ask',
+          'place': 'screen-place',
+          'food': 'screen-food',
+          'time': 'screen-time',
+          'final': 'screen-final'
+        };
 
-        // Apply transition class
-        if (targetScreen === 'decline') {
-          targetEl.classList.add('fade-in-up');
-        } else if (direction === 'forward') {
-          targetEl.classList.add('slide-in-right');
-        } else {
-          targetEl.classList.add('slide-in-left');
-        }
-
-        // Show/hide floating hearts (only on landing)
-        bgHearts.style.display = (targetScreen === 'landing') ? '' : 'none';
-
-        // If accepting, show the right step
-        if (targetScreen === 'accept') {
-          showStep(targetStep);
-
-          if (targetStep === 1) {
-            renderCalendar();
-          } else if (targetStep === 2) {
-            renderChips(activitiesGrid, ACTIVITIES, state.selectedActivities, 'activity');
-          } else if (targetStep === 3) {
-            renderChips(foodGrid, FOOD_TYPES, state.selectedFoodTypes, 'food');
-          } else if (targetStep === 4) {
-            renderSummary();
+        var screenEl = document.getElementById(screenMap[pageName]);
+        if (screenEl) {
+          screenEl.classList.remove('screen--hidden');
+          // Re-trigger fade-in animation on main content
+          var animEl = screenEl.querySelector('.fade-in-up');
+          if (animEl) {
+            animEl.style.animation = 'none';
+            animEl.offsetHeight;
+            animEl.style.animation = '';
           }
         }
 
-        // Scroll to top
-        targetEl.scrollTop = 0;
+        // Render dynamic content
+        if (pageName === 'food') {
+          renderFoodChips();
+        }
+        if (pageName === 'final') {
+          renderFinalCard();
+        }
+
         window.scrollTo(0, 0);
       }
 
-      function showStep(stepNum) {
-        var steps = document.querySelectorAll('#screen-accept .step');
-        for (var i = 0; i < steps.length; i++) {
-          steps[i].classList.add('step--hidden');
-        }
-        var stepEl = document.getElementById('step-' + stepNum);
-        if (stepEl) {
-          stepEl.classList.remove('step--hidden');
-          // Re-trigger animation
-          stepEl.style.animation = 'none';
-          stepEl.offsetHeight; // force reflow
-          stepEl.style.animation = '';
-        }
-        updateProgress(stepNum);
-      }
+      // ============================
+      // ENVELOPE INTERACTION
+      // ============================
+      function openEnvelope() {
+        if (state.envelopeOpened) return;
+        state.envelopeOpened = true;
 
-      function updateProgress(stepNum) {
-        var dots = progressBar.querySelectorAll('.progress-dot');
-        var lines = progressBar.querySelectorAll('.progress-line');
+        document.getElementById('envelope-flap').classList.add('opened');
+        document.getElementById('envelope-seal').classList.add('hidden');
+        document.getElementById('envelope-letter').classList.add('peeking');
 
-        for (var i = 0; i < dots.length; i++) {
-          var s = i + 1;
-          dots[i].classList.remove('active', 'done');
-          if (s === stepNum) dots[i].classList.add('active');
-          else if (s < stepNum) dots[i].classList.add('done');
-        }
-
-        for (var j = 0; j < lines.length; j++) {
-          lines[j].classList.remove('done');
-          if (j + 1 < stepNum) lines[j].classList.add('done');
-        }
+        // After animation, go to page 2
+        setTimeout(function() {
+          showPage('cares');
+        }, 600);
       }
 
       // ============================
-      // CALENDAR RENDERER
+      // FOOD CHIPS
       // ============================
-      function renderCalendar() {
-        if (!calYear) {
-          calYear = today.getFullYear();
-          calMonth = today.getMonth();
-        }
+      function renderFoodChips() {
+        var grid = document.getElementById('food-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
 
-        calendarMonthLabel.textContent = calYear + '年 ' + (calMonth + 1) + '月';
-
-        // Calculate days
-        var firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Sunday
-        var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-        var daysInPrevMonth = new Date(calYear, calMonth, 0).getDate();
-
-        calendarGrid.innerHTML = '';
-
-        // Previous month days (filler)
-        for (var i = firstDay - 1; i >= 0; i--) {
-          var dayVal = daysInPrevMonth - i;
-          var btn = el('button', {
-            className: 'calendar-day',
-            disabled: true,
-            textContent: dayVal,
-            type: 'button'
-          });
-          calendarGrid.appendChild(btn);
-        }
-
-        // Current month days
-        for (var d = 1; d <= daysInMonth; d++) {
-          var dateStr = calYear + '-' +
-            String(calMonth + 1).padStart(2, '0') + '-' +
-            String(d).padStart(2, '0');
-
-          var classes = ['calendar-day'];
-
-          if (state.selectedDate === dateStr) {
-            classes.push('calendar-day--selected');
-          }
-
-          // Check if it's today
-          var checkDate = new Date(calYear, calMonth, d);
-          if (checkDate.getTime() === today.getTime()) {
-            classes.push('calendar-day--today');
-          }
-
-          var dayBtn = el('button', {
-            className: classes.join(' '),
-            'data-date': dateStr,
-            'aria-label': (calMonth + 1) + '月' + d + '日',
-            textContent: d,
-            type: 'button'
-          });
-          calendarGrid.appendChild(dayBtn);
-        }
-
-        // Update selected label
-        if (state.selectedDate) {
-          calendarSelectedLabel.textContent = '已选：' + formatDate(state.selectedDate) + ' ' + getWeekdayCN(state.selectedDate);
-        } else {
-          calendarSelectedLabel.textContent = '';
-        }
-
-        updateNextButton(1);
-      }
-
-      function selectDate(dateStr) {
-        state.selectedDate = dateStr;
-        renderCalendar();
-      }
-
-      // ============================
-      // CHIP RENDERER
-      // ============================
-      function renderChips(container, items, selectedArr, type) {
-        container.innerHTML = '';
-        for (var i = 0; i < items.length; i++) {
-          (function(item) {
-            var isSelected = selectedArr.indexOf(item.id) !== -1;
-            var btn = el('button', {
-              className: 'btn-pill' + (isSelected ? ' selected' : ''),
-              'data-chip-id': item.id,
-              'data-chip-type': type,
-              textContent: item.emoji + ' ' + item.label,
-              type: 'button'
+        for (var i = 0; i < FOODS.length; i++) {
+          (function(food) {
+            var isSelected = state.selectedFoods.indexOf(food.id) !== -1;
+            var chip = document.createElement('button');
+            chip.className = 'food-chip' + (isSelected ? ' selected' : '');
+            chip.textContent = food.emoji + ' ' + food.label;
+            chip.setAttribute('data-food-id', food.id);
+            chip.setAttribute('type', 'button');
+            chip.addEventListener('click', function() {
+              toggleFood(food.id);
             });
-            container.appendChild(btn);
-          })(items[i]);
+            grid.appendChild(chip);
+          })(FOODS[i]);
         }
 
-        var stepNum = type === 'activity' ? 2 : 3;
-        updateNextButton(stepNum);
+        updateFoodNextButton();
       }
 
-      function toggleChip(chipId, type) {
-        var arr;
-        if (type === 'activity') {
-          arr = state.selectedActivities;
-        } else {
-          arr = state.selectedFoodTypes;
-        }
-
-        var idx = arr.indexOf(chipId);
+      function toggleFood(foodId) {
+        var idx = state.selectedFoods.indexOf(foodId);
         if (idx === -1) {
-          arr.push(chipId);
+          state.selectedFoods.push(foodId);
         } else {
-          arr.splice(idx, 1);
+          state.selectedFoods.splice(idx, 1);
         }
-
-        // Re-render
-        var grid, items;
-        if (type === 'activity') {
-          grid = activitiesGrid;
-          items = ACTIVITIES;
-        } else {
-          grid = foodGrid;
-          items = FOOD_TYPES;
-        }
-        renderChips(grid, items, arr, type);
+        renderFoodChips();
       }
 
-      function updateNextButton(stepNum) {
-        var btn = document.getElementById('btn-next-' + stepNum);
-        if (!btn) return;
-
-        if (stepNum === 1) {
-          btn.disabled = !state.selectedDate;
-        } else if (stepNum === 2) {
-          btn.disabled = state.selectedActivities.length === 0;
-        } else if (stepNum === 3) {
-          btn.disabled = state.selectedFoodTypes.length === 0;
+      function updateFoodNextButton() {
+        var btn = document.getElementById('btn-food-next');
+        if (btn) {
+          btn.disabled = state.selectedFoods.length === 0;
         }
       }
 
       // ============================
-      // SUMMARY RENDERER
+      // FINAL CARD
       // ============================
-      function getItemLabel(id, items) {
-        for (var i = 0; i < items.length; i++) {
-          if (items[i].id === id) return items[i];
+      function renderFinalCard() {
+        var placeLabel = PLACE_LABELS[state.selectedPlace] || '-';
+        var timeLabel = TIME_LABELS[state.selectedTime] || '-';
+
+        var foodNames = state.selectedFoods.map(function(id) {
+          for (var i = 0; i < FOODS.length; i++) {
+            if (FOODS[i].id === id) return FOODS[i].emoji + ' ' + FOODS[i].label;
+          }
+          return id;
+        }).join('、');
+
+        var finalPlace = document.getElementById('final-place');
+        var finalFood = document.getElementById('final-food');
+        var finalTime = document.getElementById('final-time');
+
+        if (finalPlace) finalPlace.textContent = placeLabel;
+        if (finalFood) finalFood.textContent = foodNames || '-';
+        if (finalTime) finalTime.textContent = timeLabel;
+      }
+
+      // ============================
+      // EVENT HANDLERS
+      // ============================
+      document.getElementById('app').addEventListener('click', function(e) {
+
+        // Envelope click
+        if (e.target.closest('#envelope-wrapper') && state.page === 'envelope') {
+          openEnvelope();
+          return;
         }
-        return null;
-      }
 
-      function renderSummary() {
-        var dateFormatted = formatDate(state.selectedDate);
-        var weekday = getWeekdayCN(state.selectedDate);
-
-        var activityChips = state.selectedActivities.map(function(id) {
-          var item = getItemLabel(id, ACTIVITIES);
-          return item ? '<span class="summary-chip">' + item.emoji + ' ' + item.label + '</span>' : '';
-        }).join('');
-
-        var foodChips = state.selectedFoodTypes.map(function(id) {
-          var item = getItemLabel(id, FOOD_TYPES);
-          return item ? '<span class="summary-chip">' + item.emoji + ' ' + item.label + '</span>' : '';
-        }).join('');
-
-        summaryCard.innerHTML =
-          '<div class="summary-date">' +
-            '<div class="summary-date-label">Date</div>' +
-            '<div class="summary-date-value">' + dateFormatted + ' ' + weekday + '</div>' +
-          '</div>' +
-          '<div class="summary-divider"></div>' +
-          '<div class="summary-section">' +
-            '<h4>🎯 约会活动</h4>' +
-            '<div class="summary-chips">' + activityChips + '</div>' +
-          '</div>' +
-          '<div class="summary-divider"></div>' +
-          '<div class="summary-section">' +
-            '<h4>🍽️ 美食选择</h4>' +
-            '<div class="summary-chips">' + foodChips + '</div>' +
-          '</div>' +
-          '<div class="summary-footer">' +
-            '<span class="heart-icon">💕</span>' +
-          '</div>';
-      }
-
-      // ============================
-      // EVENT DELEGATION
-      // ============================
-      appEl.addEventListener('click', function(e) {
         // Action buttons
         var actionEl = e.target.closest('[data-action]');
         if (actionEl) {
           var action = actionEl.getAttribute('data-action');
 
-          if (action === 'accept') {
-            // Reset accept state
-            state.selectedDate = null;
-            state.selectedActivities = [];
-            state.selectedFoodTypes = [];
-            calYear = today.getFullYear();
-            calMonth = today.getMonth();
-            navigate('accept', 1, 'forward');
-          } else if (action === 'decline') {
-            navigate('decline', null, 'forward');
-          } else if (action === 'next') {
-            if (state.step < 4) {
-              navigate('accept', state.step + 1, 'forward');
-            }
-          } else if (action === 'back') {
-            if (state.screen === 'accept' && state.step > 1) {
-              navigate('accept', state.step - 1, 'back');
-            } else {
-              navigate('landing', null, 'back');
-            }
+          switch (action) {
+            case 'to-page3':
+              showPage('ask');
+              break;
+
+            case 'willing':
+              showPage('place');
+              break;
+
+            case 'think':
+              // Cute shake animation on the button
+              actionEl.style.animation = 'gentleShake 0.3s ease';
+              setTimeout(function() {
+                actionEl.style.animation = '';
+              }, 300);
+              break;
+
+            case 'to-page5':
+              if (state.selectedPlace) {
+                showPage('food');
+              }
+              break;
+
+            case 'to-page6':
+              if (state.selectedFoods.length > 0) {
+                showPage('time');
+              }
+              break;
+
+            case 'show-final':
+              if (state.selectedTime) {
+                showPage('final');
+              }
+              break;
+
+            case 'restart':
+              state.selectedPlace = null;
+              state.selectedFoods = [];
+              state.selectedTime = null;
+              showPage('place');
+              break;
           }
           return;
         }
 
-        // Calendar date selection
-        var dayEl = e.target.closest('.calendar-day');
-        if (dayEl && !dayEl.disabled) {
-          var dateStr = dayEl.getAttribute('data-date');
-          if (dateStr) {
-            selectDate(dateStr);
+        // Place selection
+        var placeOption = e.target.closest('.place-option');
+        if (placeOption && state.page === 'place') {
+          var placeValue = placeOption.getAttribute('data-place');
+          state.selectedPlace = placeValue;
+
+          // Update selected visual
+          var allOptions = document.querySelectorAll('.place-option');
+          for (var i = 0; i < allOptions.length; i++) {
+            allOptions[i].classList.remove('selected');
           }
+          placeOption.classList.add('selected');
+
+          // Enable next button
+          var nextBtn = document.getElementById('btn-place-next');
+          if (nextBtn) nextBtn.disabled = false;
           return;
         }
 
-        // Calendar month navigation
-        var calNav = e.target.closest('[data-calendar-action]');
-        if (calNav) {
-          var calAction = calNav.getAttribute('data-calendar-action');
-          if (calAction === 'prev') {
-            calMonth--;
-            if (calMonth < 0) {
-              calMonth = 11;
-              calYear--;
-            }
-          } else if (calAction === 'next') {
-            calMonth++;
-            if (calMonth > 11) {
-              calMonth = 0;
-              calYear++;
-            }
-          }
-          renderCalendar();
-          return;
-        }
+        // Time selection
+        var timeOption = e.target.closest('.time-option');
+        if (timeOption && state.page === 'time') {
+          var timeValue = timeOption.getAttribute('data-time');
+          state.selectedTime = timeValue;
 
-        // Chip toggle
-        var chipEl = e.target.closest('.btn-pill');
-        if (chipEl) {
-          var chipId = chipEl.getAttribute('data-chip-id');
-          var chipType = chipEl.getAttribute('data-chip-type');
-          if (chipId && chipType) {
-            toggleChip(chipId, chipType);
+          // Update selected visual
+          var allTimeOptions = document.querySelectorAll('.time-option');
+          for (var j = 0; j < allTimeOptions.length; j++) {
+            allTimeOptions[j].classList.remove('selected');
           }
+          timeOption.classList.add('selected');
+
+          // Enable next button
+          var timeNextBtn = document.getElementById('btn-time-next');
+          if (timeNextBtn) timeNextBtn.disabled = false;
+          return;
         }
       });
 
       // ============================
-      // INITIALIZATION
+      // INIT
       // ============================
-      function init() {
-        calYear = today.getFullYear();
-        calMonth = today.getMonth();
-        renderCalendar();
-      }
-
-      init();
+      // Pre-render food chips
+      renderFoodChips();
 
     })();
   </script>
