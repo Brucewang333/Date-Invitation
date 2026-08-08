@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#FFF0F3">
+  <meta property="og:title" content="约会邀请 💌">
+  <meta property="og:description" content="想和你共度美好的一天～">
+  <title>Date Invitation</title>
+
+  <style>
+    /* ===================================
+       DESIGN TOKENS
+    =================================== */
+    :root {
+      --rosewater: #FFF0F3;
+      --blush: #FFE4E1;
+      --cherry: #FFB6C1;
+      --pink-mid: #FFC0CB;
+      --pink-deep: #FF91A4;
+      --pink-dark: #E8788A;
+      --cocoa: #4A3040;
+      --taupe: #8B7B83;
+      --cream: #FFFBF7;
+      --white: #FFFFFF;
+
+      --shadow-sm: 0 2px 8px rgba(255, 182, 193, 0.20);
+      --shadow-md: 0 4px 20px rgba(255, 182, 193, 0.25);
+      --shadow-lg: 0 8px 32px rgba(255, 182, 193, 0.30);
+      --shadow-button: 0 4px 14px rgba(255, 145, 164, 0.35);
+      --shadow-card: 0 6px 24px rgba(255, 182, 193, 0.30);
+
+      --font-display: "Georgia", "STSong", "Songti SC", "Noto Serif SC", serif;
+      --font-body: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+
+      --text-xs: 0.75rem;
+      --text-sm: 0.875rem;
+      --text-base: 1rem;
+      --text-lg: 1.125rem;
+      --text-xl: 1.375rem;
+      --text-2xl: 1.75rem;
+      --text-3xl: 2.25rem;
+
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 0.75rem;
+      --space-lg: 1rem;
+      --space-xl: 1.5rem;
+      --space-2xl: 2rem;
+      --space-3xl: 2.5rem;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --radius-full: 9999px;
+
+      --max-width: 420px;
+      --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+      --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+      --duration-normal: 300ms;
+      --duration-slow: 500ms;
+    }
+
+    /* ===================================
+       RESET & BASE
+    =================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 16px;
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--cocoa);
+      background: var(--rosewater);
+      background-image: radial-gradient(ellipse at 50% 0%, #FFE4E1 0%, #FFF0F3 60%);
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow-x: hidden;
+    }
+
+    #app {
+      width: 100%;
+      max-width: var(--max-width);
+      min-height: 100dvh;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===================================
+       SCREEN MANAGEMENT
+    =================================== */
+    .screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: var(--space-xl);
+      padding-bottom: calc(var(--space-3xl) + env(safe-area-inset-bottom, 0px));
+      transition: opacity var(--duration-normal) var(--ease-in-out),
+                  transform var(--duration-normal) var(--ease-out-expo);
+    }
+
+    .screen--hidden {
+      display: none !important;
+    }
+
+    /* Transition classes */
+    .slide-in-right {
+      animation: slideInRight var(--duration-normal) var(--ease-out-expo);
+    }
+
+    .slide-in-left {
+      animation: slideInLeft var(--duration-normal) var(--ease-out-expo);
+    }
+
+    .fade-in {
+      animation: fadeIn var(--duration-slow) var(--ease-in-out);
+    }
+
+    .fade-in-up {
+      animation: fadeInUp var(--duration-slow) var(--ease-in-out);
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(30px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-30px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes floatHeart {
+      0%   { transform: translateY(100vh) scale(0.5) rotate(0deg); opacity: 0; }
+      10%  { opacity: 0.08; }
+      90%  { opacity: 0.06; }
+      100% { transform: translateY(-10vh) scale(1.2) rotate(20deg); opacity: 0; }
+    }
+
+    /* ===================================
+       LANDING SCREEN
+    =================================== */
+    #screen-landing {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+
+    /* Floating hearts background */
+    .bg-hearts {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+      max-width: 100vw;
+    }
+
+    .bg-hearts .heart {
+      position: absolute;
+      font-size: 2rem;
+      bottom: -5vh;
+      animation: floatHeart 16s linear infinite;
+      opacity: 0;
+    }
+
+    .bg-hearts .heart:nth-child(1)  { left: 5%;  animation-duration: 14s; animation-delay: 0s;    font-size: 1.6rem; }
+    .bg-hearts .heart:nth-child(2)  { left: 15%; animation-duration: 18s; animation-delay: 2s;    font-size: 2.2rem; }
+    .bg-hearts .heart:nth-child(3)  { left: 28%; animation-duration: 16s; animation-delay: 5s;    font-size: 1.8rem; }
+    .bg-hearts .heart:nth-child(4)  { left: 40%; animation-duration: 20s; animation-delay: 1s;    font-size: 2.4rem; }
+    .bg-hearts .heart:nth-child(5)  { left: 55%; animation-duration: 15s; animation-delay: 7s;    font-size: 1.5rem; }
+    .bg-hearts .heart:nth-child(6)  { left: 65%; animation-duration: 19s; animation-delay: 3s;    font-size: 2rem; }
+    .bg-hearts .heart:nth-child(7)  { left: 78%; animation-duration: 17s; animation-delay: 6s;    font-size: 1.7rem; }
+    .bg-hearts .heart:nth-child(8)  { left: 90%; animation-duration: 21s; animation-delay: 4s;    font-size: 2.1rem; }
+
+    .hero {
+      position: relative;
+      z-index: 1;
+      margin-bottom: var(--space-3xl);
+    }
+
+    .hero-emoji {
+      font-size: 4rem;
+      margin-bottom: var(--space-lg);
+      animation: fadeInUp 0.8s var(--ease-out-expo);
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: var(--text-3xl);
+      color: var(--cocoa);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-bottom: var(--space-md);
+      animation: fadeInUp 0.8s var(--ease-out-expo) 0.1s both;
+    }
+
+    .hero-subtitle {
+      font-size: var(--text-lg);
+      color: var(--taupe);
+      animation: fadeInUp 0.8s var(--ease-out-expo) 0.2s both;
+    }
+
+    .action-buttons {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+      animation: fadeInUp 0.8s var(--ease-out-expo) 0.3s both;
+    }
+
+    /* ===================================
+       BUTTONS
+    =================================== */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      height: 56px;
+      border-radius: var(--radius-xl);
+      font-family: var(--font-body);
+      font-size: var(--text-lg);
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s var(--ease-in-out),
+                  background-color 0.2s var(--ease-in-out),
+                  opacity 0.2s var(--ease-in-out);
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn:focus-visible {
+      outline: 3px solid var(--pink-deep);
+      outline-offset: 2px;
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .btn-accept {
+      background: var(--cherry);
+      color: var(--white);
+      box-shadow: var(--shadow-button);
+      font-size: 1.3rem;
+      height: 64px;
+      letter-spacing: 0.04em;
+    }
+
+    .btn-accept:active {
+      background: var(--pink-deep);
+    }
+
+    .btn-decline {
+      background: var(--white);
+      color: var(--taupe);
+      border: 2px solid var(--pink-mid);
+      font-size: 1.3rem;
+      height: 64px;
+      letter-spacing: 0.04em;
+    }
+
+    .btn-decline:active {
+      background: var(--blush);
+    }
+
+    .btn-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: var(--space-md) var(--space-xl);
+      background: var(--white);
+      color: var(--cocoa);
+      border: 2px solid var(--pink-mid);
+      border-radius: var(--radius-full);
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s var(--ease-in-out);
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+      outline: none;
+    }
+
+    .btn-pill:focus-visible {
+      outline: 3px solid var(--pink-deep);
+      outline-offset: 2px;
+    }
+
+    .btn-pill.selected {
+      background: var(--cherry);
+      color: var(--white);
+      border-color: var(--cherry);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ===================================
+       DECLINE SCREEN
+    =================================== */
+    #screen-decline {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .decline-content {
+      animation: fadeInUp 0.6s var(--ease-out-expo);
+    }
+
+    .decline-emoji {
+      font-size: 5rem;
+      margin-bottom: var(--space-xl);
+    }
+
+    .decline-title {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      color: var(--cocoa);
+      margin-bottom: var(--space-md);
+    }
+
+    .decline-message {
+      font-size: var(--text-lg);
+      color: var(--taupe);
+      margin-bottom: var(--space-sm);
+    }
+
+    .decline-sub {
+      font-size: var(--text-base);
+      color: var(--taupe);
+      opacity: 0.7;
+    }
+
+    /* ===================================
+       ACCEPT SCREEN — PROGRESS BAR
+    =================================== */
+    .progress-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: var(--space-2xl);
+      padding: var(--space-md) 0;
+    }
+
+    .progress-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 2px solid var(--pink-mid);
+      transition: all var(--duration-normal) var(--ease-in-out);
+      flex-shrink: 0;
+    }
+
+    .progress-dot.active {
+      background: var(--cherry);
+      border-color: var(--cherry);
+      box-shadow: 0 0 0 4px rgba(255, 182, 193, 0.3);
+      width: 16px;
+      height: 16px;
+    }
+
+    .progress-dot.done {
+      background: var(--cherry);
+      border-color: var(--cherry);
+    }
+
+    .progress-line {
+      width: 32px;
+      height: 2px;
+      background: var(--pink-mid);
+      flex-shrink: 0;
+    }
+
+    .progress-line.done {
+      background: var(--cherry);
+    }
+
+    /* ===================================
+       STEPS
+    =================================== */
+    .step {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      animation: fadeInUp var(--duration-normal) var(--ease-out-expo);
+    }
+
+    .step--hidden {
+      display: none !important;
+    }
+
+    .step-question {
+      text-align: center;
+      margin-bottom: var(--space-xl);
+    }
+
+    .step-emoji {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: var(--space-md);
+    }
+
+    .step-question h3 {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      color: var(--cocoa);
+      margin-bottom: var(--space-xs);
+    }
+
+    .step-question p {
+      font-size: var(--text-sm);
+      color: var(--taupe);
+    }
+
+    /* ===================================
+       CHIP GRID
+    =================================== */
+    .chip-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      justify-content: center;
+      margin-bottom: var(--space-xl);
+      flex: 1;
+      align-content: flex-start;
+      overflow-y: auto;
+      padding: var(--space-xs);
+    }
+
+    /* ===================================
+       STEP ACTIONS
+    =================================== */
+    .step-actions {
+      display: flex;
+      gap: var(--space-md);
+      padding-top: var(--space-lg);
+      flex-shrink: 0;
+    }
+
+    .btn-back {
+      background: none;
+      color: var(--taupe);
+      border: none;
+      font-size: var(--text-base);
+      flex-shrink: 0;
+      width: auto;
+      padding: 0 var(--space-lg);
+    }
+
+    .btn-back:active {
+      opacity: 0.6;
+    }
+
+    .btn-next {
+      background: var(--cherry);
+      color: var(--white);
+      box-shadow: var(--shadow-button);
+      flex: 1;
+    }
+
+    .btn-next:active {
+      background: var(--pink-deep);
+    }
+
+    /* ===================================
+       CALENDAR
+    =================================== */
+    .calendar {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      box-shadow: var(--shadow-md);
+      margin-bottom: var(--space-xl);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-lg);
+    }
+
+    .calendar-nav {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: var(--blush);
+      color: var(--cocoa);
+      font-size: var(--text-lg);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .calendar-nav:active {
+      background: var(--pink-mid);
+    }
+
+    .calendar-month {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      font-weight: 600;
+      color: var(--cocoa);
+    }
+
+    .calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      margin-bottom: var(--space-sm);
+    }
+
+    .calendar-weekdays span {
+      font-size: var(--text-xs);
+      color: var(--taupe);
+      font-weight: 500;
+      padding: var(--space-xs) 0;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: none;
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      color: var(--cocoa);
+      cursor: pointer;
+      border-radius: 50%;
+      transition: all 0.15s var(--ease-in-out);
+      min-width: 36px;
+      min-height: 36px;
+    }
+
+    .calendar-day:focus-visible {
+      outline: 2px solid var(--pink-deep);
+      outline-offset: -2px;
+    }
+
+    .calendar-day:hover:not(:disabled) {
+      background: var(--blush);
+    }
+
+    .calendar-day:disabled {
+      color: #ddd;
+      cursor: default;
+    }
+
+    .calendar-day--selected {
+      background: var(--cherry) !important;
+      color: var(--white) !important;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(255, 182, 193, 0.4);
+    }
+
+    .calendar-day--today {
+      font-weight: 700;
+      color: var(--pink-deep);
+    }
+
+    .calendar-selected-label {
+      text-align: center;
+      font-size: var(--text-sm);
+      color: var(--pink-deep);
+      margin-top: var(--space-md);
+      font-weight: 500;
+      min-height: 1.5em;
+    }
+
+    /* ===================================
+       SUMMARY CARD
+    =================================== */
+    .summary-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--space-2xl) var(--space-xl);
+      box-shadow: var(--shadow-card);
+      transform: rotate(-0.8deg);
+      margin-bottom: var(--space-xl);
+      position: relative;
+    }
+
+    .summary-card::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      border: 2px dashed var(--pink-mid);
+      border-radius: var(--radius-md);
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .summary-date {
+      text-align: center;
+      margin-bottom: var(--space-lg);
+    }
+
+    .summary-date-label {
+      font-size: var(--text-xs);
+      color: var(--taupe);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--space-xs);
+    }
+
+    .summary-date-value {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      color: var(--cocoa);
+    }
+
+    .summary-divider {
+      width: 60px;
+      height: 2px;
+      background: var(--cherry);
+      margin: var(--space-lg) auto;
+      border-radius: 1px;
+    }
+
+    .summary-section {
+      margin-bottom: var(--space-lg);
+    }
+
+    .summary-section h4 {
+      font-size: var(--text-sm);
+      color: var(--taupe);
+      margin-bottom: var(--space-md);
+      text-align: center;
+    }
+
+    .summary-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      justify-content: center;
+    }
+
+    .summary-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--blush);
+      border-radius: var(--radius-full);
+      font-size: var(--text-sm);
+      color: var(--cocoa);
+    }
+
+    .summary-footer {
+      text-align: center;
+      margin-top: var(--space-lg);
+    }
+
+    .summary-footer .heart-icon {
+      font-size: 1.5rem;
+      display: block;
+      margin-bottom: var(--space-xs);
+    }
+
+    .screenshot-hint {
+      text-align: center;
+      font-size: var(--text-sm);
+      color: var(--taupe);
+      margin-bottom: var(--space-lg);
+    }
+
+    .screenshot-hint .camera {
+      font-size: 1.2rem;
+    }
+
+    /* ===================================
+       NOSCRIPT FALLBACK
+    =================================== */
+    noscript {
+      display: block;
+      text-align: center;
+      padding: var(--space-3xl);
+      font-family: var(--font-body);
+      color: var(--cocoa);
+    }
+
+    /* ===================================
+       REDUCED MOTION
+    =================================== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      .bg-hearts {
+        display: none;
+      }
+    }
+
+    /* ===================================
+       RESPONSIVE
+    =================================== */
+    @media (max-width: 360px) {
+      :root {
+        --text-3xl: 1.75rem;
+        --text-2xl: 1.5rem;
+        --text-xl: 1.125rem;
+      }
+
+      .calendar-day {
+        min-width: 32px;
+        min-height: 32px;
+        font-size: var(--text-xs);
+      }
+
+      .btn-pill {
+        padding: var(--space-sm) var(--space-lg);
+        font-size: var(--text-sm);
+      }
+
+      .summary-card {
+        padding: var(--space-xl) var(--space-lg);
+      }
+    }
+
+    /* ===================================
+       SCROLLBAR
+    =================================== */
+    .chip-grid::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .chip-grid::-webkit-scrollbar-thumb {
+      background: var(--pink-mid);
+      border-radius: 2px;
+    }
+
+    .chip-grid::-webkit-scrollbar-track {
+      background: transparent;
+    }
+  </style>
+</head>
+<body>
+  <!-- ===================================
+     FLOATING HEARTS BACKGROUND
+  =================================== -->
+  <div class="bg-hearts" id="bg-hearts" aria-hidden="true">
+    <span class="heart">💕</span>
+    <span class="heart">💗</span>
+    <span class="heart">💖</span>
+    <span class="heart">💝</span>
+    <span class="heart">🌸</span>
+    <span class="heart">💕</span>
+    <span class="heart">💗</span>
+    <span class="heart">✨</span>
+  </div>
+
+  <!-- ===================================
+     APP CONTAINER
+  =================================== -->
+  <div id="app">
+    <!-- LANDING SCREEN -->
+    <section class="screen" id="screen-landing">
+      <div class="hero">
+        <div class="hero-emoji">💌</div>
+        <h1 class="hero-title">Date Invitation</h1>
+        <p class="hero-subtitle">想和你共度美好的一天</p>
+      </div>
+      <div class="action-buttons">
+        <button class="btn btn-accept" data-action="accept" type="button">
+          <span>💚</span>
+          <span>Accept</span>
+        </button>
+        <button class="btn btn-decline" data-action="decline" type="button">
+          <span>💔</span>
+          <span>Decline</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- DECLINE SCREEN -->
+    <section class="screen screen--hidden" id="screen-decline">
+      <div class="decline-content">
+        <div class="decline-emoji">🥺</div>
+        <h2 class="decline-title">没关系</h2>
+        <p class="decline-message">下次再约哦～</p>
+        <p class="decline-sub">期待与你相遇的那一天 💕</p>
+      </div>
+    </section>
+
+    <!-- ACCEPT SCREEN -->
+    <section class="screen screen--hidden" id="screen-accept">
+      <!-- Progress Bar -->
+      <nav class="progress-bar" id="progress-bar" aria-label="步骤进度">
+        <div class="progress-dot active" data-progress="1"></div>
+        <div class="progress-line" data-progress-line="1"></div>
+        <div class="progress-dot" data-progress="2"></div>
+        <div class="progress-line" data-progress-line="2"></div>
+        <div class="progress-dot" data-progress="3"></div>
+        <div class="progress-line" data-progress-line="3"></div>
+        <div class="progress-dot" data-progress="4"></div>
+      </nav>
+
+      <!-- Step 1: Date Picker -->
+      <div class="step" id="step-1">
+        <div class="step-question">
+          <span class="step-emoji">📅</span>
+          <h3>哪一天约会呢？</h3>
+          <p>选一个你最喜欢的日子吧</p>
+        </div>
+        <div class="calendar" id="calendar">
+          <div class="calendar-header">
+            <button class="calendar-nav" data-calendar-action="prev" type="button" aria-label="上个月">◂</button>
+            <span class="calendar-month" id="calendar-month-label"></span>
+            <button class="calendar-nav" data-calendar-action="next" type="button" aria-label="下个月">▸</button>
+          </div>
+          <div class="calendar-weekdays">
+            <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+          </div>
+          <div class="calendar-grid" id="calendar-grid"></div>
+          <div class="calendar-selected-label" id="calendar-selected-label"></div>
+        </div>
+        <div class="step-actions">
+          <button class="btn btn-back" data-action="back" type="button">← 返回</button>
+          <button class="btn btn-next" data-action="next" type="button" disabled id="btn-next-1">下一步 →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Activities -->
+      <div class="step step--hidden" id="step-2">
+        <div class="step-question">
+          <span class="step-emoji">🎯</span>
+          <h3>想做什么呢？</h3>
+          <p>选几个喜欢的活动吧（可多选）</p>
+        </div>
+        <div class="chip-grid" id="activities-grid"></div>
+        <div class="step-actions">
+          <button class="btn btn-back" data-action="back" type="button">← 返回</button>
+          <button class="btn btn-next" data-action="next" type="button" disabled id="btn-next-2">下一步 →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Food Types -->
+      <div class="step step--hidden" id="step-3">
+        <div class="step-question">
+          <span class="step-emoji">🍽️</span>
+          <h3>想吃什么？</h3>
+          <p>选几种想吃的美食吧（可多选）</p>
+        </div>
+        <div class="chip-grid" id="food-grid"></div>
+        <div class="step-actions">
+          <button class="btn btn-back" data-action="back" type="button">← 返回</button>
+          <button class="btn btn-next" data-action="next" type="button" disabled id="btn-next-3">下一步 →</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Summary Card -->
+      <div class="step step--hidden" id="step-4">
+        <div class="step-question">
+          <span class="step-emoji">✨</span>
+          <h3>约会计划确认</h3>
+        </div>
+        <div class="summary-card" id="summary-card"></div>
+        <p class="screenshot-hint">
+          <span class="camera">📸</span> 截图发给对方确认吧～
+        </p>
+        <div class="step-actions">
+          <button class="btn btn-back" data-action="back" type="button">← 返回修改</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Fallback for noscript -->
+  <noscript>
+    <div>💌 Date Invitation</div>
+    <p>请启用 JavaScript 来查看约会邀请～</p>
+  </noscript>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // ============================
+      // CONSTANTS
+      // ============================
+      var ACTIVITIES = [
+        { id: 'movie',      label: '看电影',   emoji: '🎬' },
+        { id: 'park',       label: '逛公园',   emoji: '🌳' },
+        { id: 'coffee',     label: '喝咖啡',   emoji: '☕' },
+        { id: 'shopping',   label: '逛街',     emoji: '🛍️' },
+        { id: 'gaming',     label: '打游戏',   emoji: '🎮' },
+        { id: 'craft',      label: '做手工',   emoji: '🎨' },
+        { id: 'exhibition', label: '看展览',   emoji: '🖼️' },
+        { id: 'cooking',    label: '一起做饭', emoji: '👨‍🍳' },
+        { id: 'sports',     label: '运动',     emoji: '⚽' },
+        { id: 'travel',     label: '旅行',     emoji: '✈️' }
+      ];
+
+      var FOOD_TYPES = [
+        { id: 'chinese',    label: '中餐',       emoji: '🥢' },
+        { id: 'japanese',   label: '日料',       emoji: '🍣' },
+        { id: 'korean',     label: '韩料',       emoji: '🥩' },
+        { id: 'western',    label: '西餐',       emoji: '🥩' },
+        { id: 'hotpot',     label: '火锅',       emoji: '🍲' },
+        { id: 'bbq',        label: '烧烤',       emoji: '🍖' },
+        { id: 'thai',       label: '泰国菜',     emoji: '🍜' },
+        { id: 'vietnamese', label: '越南菜',     emoji: '🍜' },
+        { id: 'italian',    label: '意大利菜',   emoji: '🍝' },
+        { id: 'french',     label: '法餐',       emoji: '🥐' },
+        { id: 'dessert',    label: '甜品下午茶', emoji: '🍰' },
+        { id: 'streetfood', label: '小吃夜市',   emoji: '🍢' },
+        { id: 'buffet',     label: '自助餐',     emoji: '🍽️' },
+        { id: 'seafood',    label: '海鲜',       emoji: '🦞' },
+        { id: 'vegetarian', label: '素食',       emoji: '🥗' }
+      ];
+
+      // ============================
+      // STATE
+      // ============================
+      var state = {
+        screen: 'landing',
+        step: 1,
+        selectedDate: null,
+        selectedActivities: [],
+        selectedFoodTypes: []
+      };
+
+      // Calendar internal state
+      var calYear, calMonth;
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // ============================
+      // DOM REFS
+      // ============================
+      var appEl = document.getElementById('app');
+      var screenLanding = document.getElementById('screen-landing');
+      var screenDecline = document.getElementById('screen-decline');
+      var screenAccept = document.getElementById('screen-accept');
+      var bgHearts = document.getElementById('bg-hearts');
+      var calendarGrid = document.getElementById('calendar-grid');
+      var calendarMonthLabel = document.getElementById('calendar-month-label');
+      var calendarSelectedLabel = document.getElementById('calendar-selected-label');
+      var activitiesGrid = document.getElementById('activities-grid');
+      var foodGrid = document.getElementById('food-grid');
+      var summaryCard = document.getElementById('summary-card');
+      var progressBar = document.getElementById('progress-bar');
+
+      // ============================
+      // UTILITY
+      // ============================
+      function formatDate(isoStr) {
+        if (!isoStr) return '';
+        var parts = isoStr.split('-');
+        return parts[0] + '年' + parseInt(parts[1]) + '月' + parseInt(parts[2]) + '日';
+      }
+
+      function getWeekdayCN(isoStr) {
+        var d = new Date(isoStr + 'T00:00:00');
+        var days = ['日', '一', '二', '三', '四', '五', '六'];
+        return '星期' + days[d.getDay()];
+      }
+
+      function el(tag, attrs, children) {
+        var e = document.createElement(tag);
+        if (attrs) {
+          for (var k in attrs) {
+            if (k === 'className') e.className = attrs[k];
+            else if (k === 'disabled') { if (attrs[k]) e.setAttribute('disabled', ''); }
+            else if (k === 'type') e.setAttribute('type', attrs[k]);
+            else if (k.startsWith('data-')) e.setAttribute(k, attrs[k]);
+            else if (k === 'textContent') e.textContent = attrs[k];
+            else if (k === 'innerHTML') e.innerHTML = attrs[k];
+            else e.setAttribute(k, attrs[k]);
+          }
+        }
+        if (children && Array.isArray(children)) {
+          children.forEach(function(c) { if (c) e.appendChild(c); });
+        }
+        return e;
+      }
+
+      // ============================
+      // NAVIGATION
+      // ============================
+      function navigate(targetScreen, targetStep, direction) {
+        targetStep = targetStep || 1;
+        direction = direction || 'forward';
+        var prevScreen = state.screen;
+
+        state.screen = targetScreen;
+        if (targetScreen === 'accept') {
+          state.step = targetStep;
+        }
+
+        // Hide all screens
+        var screens = document.querySelectorAll('.screen');
+        for (var i = 0; i < screens.length; i++) {
+          screens[i].classList.add('screen--hidden');
+          screens[i].classList.remove('slide-in-right', 'slide-in-left', 'fade-in', 'fade-in-up');
+        }
+
+        // Show target screen
+        var targetEl = document.getElementById('screen-' + targetScreen);
+        targetEl.classList.remove('screen--hidden');
+
+        // Apply transition class
+        if (targetScreen === 'decline') {
+          targetEl.classList.add('fade-in-up');
+        } else if (direction === 'forward') {
+          targetEl.classList.add('slide-in-right');
+        } else {
+          targetEl.classList.add('slide-in-left');
+        }
+
+        // Show/hide floating hearts (only on landing)
+        bgHearts.style.display = (targetScreen === 'landing') ? '' : 'none';
+
+        // If accepting, show the right step
+        if (targetScreen === 'accept') {
+          showStep(targetStep);
+
+          if (targetStep === 1) {
+            renderCalendar();
+          } else if (targetStep === 2) {
+            renderChips(activitiesGrid, ACTIVITIES, state.selectedActivities, 'activity');
+          } else if (targetStep === 3) {
+            renderChips(foodGrid, FOOD_TYPES, state.selectedFoodTypes, 'food');
+          } else if (targetStep === 4) {
+            renderSummary();
+          }
+        }
+
+        // Scroll to top
+        targetEl.scrollTop = 0;
+        window.scrollTo(0, 0);
+      }
+
+      function showStep(stepNum) {
+        var steps = document.querySelectorAll('#screen-accept .step');
+        for (var i = 0; i < steps.length; i++) {
+          steps[i].classList.add('step--hidden');
+        }
+        var stepEl = document.getElementById('step-' + stepNum);
+        if (stepEl) {
+          stepEl.classList.remove('step--hidden');
+          // Re-trigger animation
+          stepEl.style.animation = 'none';
+          stepEl.offsetHeight; // force reflow
+          stepEl.style.animation = '';
+        }
+        updateProgress(stepNum);
+      }
+
+      function updateProgress(stepNum) {
+        var dots = progressBar.querySelectorAll('.progress-dot');
+        var lines = progressBar.querySelectorAll('.progress-line');
+
+        for (var i = 0; i < dots.length; i++) {
+          var s = i + 1;
+          dots[i].classList.remove('active', 'done');
+          if (s === stepNum) dots[i].classList.add('active');
+          else if (s < stepNum) dots[i].classList.add('done');
+        }
+
+        for (var j = 0; j < lines.length; j++) {
+          lines[j].classList.remove('done');
+          if (j + 1 < stepNum) lines[j].classList.add('done');
+        }
+      }
+
+      // ============================
+      // CALENDAR RENDERER
+      // ============================
+      function renderCalendar() {
+        if (!calYear) {
+          calYear = today.getFullYear();
+          calMonth = today.getMonth();
+        }
+
+        calendarMonthLabel.textContent = calYear + '年 ' + (calMonth + 1) + '月';
+
+        // Calculate days
+        var firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Sunday
+        var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+        var daysInPrevMonth = new Date(calYear, calMonth, 0).getDate();
+
+        calendarGrid.innerHTML = '';
+
+        // Previous month days (filler)
+        for (var i = firstDay - 1; i >= 0; i--) {
+          var dayVal = daysInPrevMonth - i;
+          var btn = el('button', {
+            className: 'calendar-day',
+            disabled: true,
+            textContent: dayVal,
+            type: 'button'
+          });
+          calendarGrid.appendChild(btn);
+        }
+
+        // Current month days
+        for (var d = 1; d <= daysInMonth; d++) {
+          var dateStr = calYear + '-' +
+            String(calMonth + 1).padStart(2, '0') + '-' +
+            String(d).padStart(2, '0');
+
+          var classes = ['calendar-day'];
+
+          if (state.selectedDate === dateStr) {
+            classes.push('calendar-day--selected');
+          }
+
+          // Check if it's today
+          var checkDate = new Date(calYear, calMonth, d);
+          if (checkDate.getTime() === today.getTime()) {
+            classes.push('calendar-day--today');
+          }
+
+          var dayBtn = el('button', {
+            className: classes.join(' '),
+            'data-date': dateStr,
+            'aria-label': (calMonth + 1) + '月' + d + '日',
+            textContent: d,
+            type: 'button'
+          });
+          calendarGrid.appendChild(dayBtn);
+        }
+
+        // Update selected label
+        if (state.selectedDate) {
+          calendarSelectedLabel.textContent = '已选：' + formatDate(state.selectedDate) + ' ' + getWeekdayCN(state.selectedDate);
+        } else {
+          calendarSelectedLabel.textContent = '';
+        }
+
+        updateNextButton(1);
+      }
+
+      function selectDate(dateStr) {
+        state.selectedDate = dateStr;
+        renderCalendar();
+      }
+
+      // ============================
+      // CHIP RENDERER
+      // ============================
+      function renderChips(container, items, selectedArr, type) {
+        container.innerHTML = '';
+        for (var i = 0; i < items.length; i++) {
+          (function(item) {
+            var isSelected = selectedArr.indexOf(item.id) !== -1;
+            var btn = el('button', {
+              className: 'btn-pill' + (isSelected ? ' selected' : ''),
+              'data-chip-id': item.id,
+              'data-chip-type': type,
+              textContent: item.emoji + ' ' + item.label,
+              type: 'button'
+            });
+            container.appendChild(btn);
+          })(items[i]);
+        }
+
+        var stepNum = type === 'activity' ? 2 : 3;
+        updateNextButton(stepNum);
+      }
+
+      function toggleChip(chipId, type) {
+        var arr;
+        if (type === 'activity') {
+          arr = state.selectedActivities;
+        } else {
+          arr = state.selectedFoodTypes;
+        }
+
+        var idx = arr.indexOf(chipId);
+        if (idx === -1) {
+          arr.push(chipId);
+        } else {
+          arr.splice(idx, 1);
+        }
+
+        // Re-render
+        var grid, items;
+        if (type === 'activity') {
+          grid = activitiesGrid;
+          items = ACTIVITIES;
+        } else {
+          grid = foodGrid;
+          items = FOOD_TYPES;
+        }
+        renderChips(grid, items, arr, type);
+      }
+
+      function updateNextButton(stepNum) {
+        var btn = document.getElementById('btn-next-' + stepNum);
+        if (!btn) return;
+
+        if (stepNum === 1) {
+          btn.disabled = !state.selectedDate;
+        } else if (stepNum === 2) {
+          btn.disabled = state.selectedActivities.length === 0;
+        } else if (stepNum === 3) {
+          btn.disabled = state.selectedFoodTypes.length === 0;
+        }
+      }
+
+      // ============================
+      // SUMMARY RENDERER
+      // ============================
+      function getItemLabel(id, items) {
+        for (var i = 0; i < items.length; i++) {
+          if (items[i].id === id) return items[i];
+        }
+        return null;
+      }
+
+      function renderSummary() {
+        var dateFormatted = formatDate(state.selectedDate);
+        var weekday = getWeekdayCN(state.selectedDate);
+
+        var activityChips = state.selectedActivities.map(function(id) {
+          var item = getItemLabel(id, ACTIVITIES);
+          return item ? '<span class="summary-chip">' + item.emoji + ' ' + item.label + '</span>' : '';
+        }).join('');
+
+        var foodChips = state.selectedFoodTypes.map(function(id) {
+          var item = getItemLabel(id, FOOD_TYPES);
+          return item ? '<span class="summary-chip">' + item.emoji + ' ' + item.label + '</span>' : '';
+        }).join('');
+
+        summaryCard.innerHTML =
+          '<div class="summary-date">' +
+            '<div class="summary-date-label">Date</div>' +
+            '<div class="summary-date-value">' + dateFormatted + ' ' + weekday + '</div>' +
+          '</div>' +
+          '<div class="summary-divider"></div>' +
+          '<div class="summary-section">' +
+            '<h4>🎯 约会活动</h4>' +
+            '<div class="summary-chips">' + activityChips + '</div>' +
+          '</div>' +
+          '<div class="summary-divider"></div>' +
+          '<div class="summary-section">' +
+            '<h4>🍽️ 美食选择</h4>' +
+            '<div class="summary-chips">' + foodChips + '</div>' +
+          '</div>' +
+          '<div class="summary-footer">' +
+            '<span class="heart-icon">💕</span>' +
+          '</div>';
+      }
+
+      // ============================
+      // EVENT DELEGATION
+      // ============================
+      appEl.addEventListener('click', function(e) {
+        // Action buttons
+        var actionEl = e.target.closest('[data-action]');
+        if (actionEl) {
+          var action = actionEl.getAttribute('data-action');
+
+          if (action === 'accept') {
+            // Reset accept state
+            state.selectedDate = null;
+            state.selectedActivities = [];
+            state.selectedFoodTypes = [];
+            calYear = today.getFullYear();
+            calMonth = today.getMonth();
+            navigate('accept', 1, 'forward');
+          } else if (action === 'decline') {
+            navigate('decline', null, 'forward');
+          } else if (action === 'next') {
+            if (state.step < 4) {
+              navigate('accept', state.step + 1, 'forward');
+            }
+          } else if (action === 'back') {
+            if (state.screen === 'accept' && state.step > 1) {
+              navigate('accept', state.step - 1, 'back');
+            } else {
+              navigate('landing', null, 'back');
+            }
+          }
+          return;
+        }
+
+        // Calendar date selection
+        var dayEl = e.target.closest('.calendar-day');
+        if (dayEl && !dayEl.disabled) {
+          var dateStr = dayEl.getAttribute('data-date');
+          if (dateStr) {
+            selectDate(dateStr);
+          }
+          return;
+        }
+
+        // Calendar month navigation
+        var calNav = e.target.closest('[data-calendar-action]');
+        if (calNav) {
+          var calAction = calNav.getAttribute('data-calendar-action');
+          if (calAction === 'prev') {
+            calMonth--;
+            if (calMonth < 0) {
+              calMonth = 11;
+              calYear--;
+            }
+          } else if (calAction === 'next') {
+            calMonth++;
+            if (calMonth > 11) {
+              calMonth = 0;
+              calYear++;
+            }
+          }
+          renderCalendar();
+          return;
+        }
+
+        // Chip toggle
+        var chipEl = e.target.closest('.btn-pill');
+        if (chipEl) {
+          var chipId = chipEl.getAttribute('data-chip-id');
+          var chipType = chipEl.getAttribute('data-chip-type');
+          if (chipId && chipType) {
+            toggleChip(chipId, chipType);
+          }
+        }
+      });
+
+      // ============================
+      // INITIALIZATION
+      // ============================
+      function init() {
+        calYear = today.getFullYear();
+        calMonth = today.getMonth();
+        renderCalendar();
+      }
+
+      init();
+
+    })();
+  </script>
+</body>
+</html>
